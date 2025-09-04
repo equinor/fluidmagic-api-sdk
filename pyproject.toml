@@ -1,0 +1,53 @@
+[project]
+name = "fluidmagic-api-sdk"
+version = "0.1.0"
+description = "SDK to ease the access and use of the Fluidmagic API."
+authors = [
+    {name = "Boathy Murugendran",email = "murugend@gmail.com"}
+]
+license = "LICENSE"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+packages = [
+    { include = "fluidmagic_api_sdk" }
+]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.1"
+black = "^25.1.0"
+pre-commit = "^4.3.0"
+isort = "^6.0.1"
+flake8 = "^7.3.0"
+
+[tool.black]
+line-length = 120
+target-version = ['py311']
+include='\.pyi?$'
+extend-exclude = '''\.git |
+            \.__pycache__|
+            \.hg|
+            \.mypy_cache|
+            \.tox|
+            \.venv|
+            _build|
+            buck-out|
+            build|
+            dist'''
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.flake8]
+max_line_length="120"
+select="E9, F63, F7, F82, F4, H4"
+ignore="E203,E266,W504,E501"
+per-file-ignores="__init__.py:F401, F821"
