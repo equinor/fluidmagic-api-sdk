@@ -5,8 +5,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
-load_dotenv(ROOT_DIR / ".settings")
-
+settings_file = ROOT_DIR / ".settings"
+if settings_file.exists():
+    load_dotenv(settings_file)
 
 @dataclass
 class Settings:
