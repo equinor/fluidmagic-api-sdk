@@ -14,6 +14,8 @@ if TYPE_CHECKING:
 
 
 class Facility(FacilityModel, BaseResource):
+    _list_model = FacilityModel
+
     @cached_property
     def eos(self):
         return EOSManager(self._client, self.id)

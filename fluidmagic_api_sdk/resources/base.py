@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, ClassVar, Self
 
 from pydantic import BaseModel, PrivateAttr
 
@@ -21,6 +21,8 @@ if TYPE_CHECKING:
 class BaseResource(BaseModel, ABC):
     _client: "SyncClient" = PrivateAttr()
 
+    _list_model: ClassVar[BaseModel] = None
+
     @classmethod
     def _from_model(cls, client: "SyncClient", model: BaseModel) -> Self:
         obj = cls.model_validate(model.model_dump())
@@ -33,7 +35,7 @@ class BaseResource(BaseModel, ABC):
 
     @classmethod
     def _parse_list(cls, payload: list[dict]) -> list[Self]:
-        return [cls._parse_model(item) for item in payload]
+        return [cls._list_model.model_validate(item) for item in payload]
 
 
 class BaseConfigResource(BaseResource, ABC):
@@ -68,7 +70,7 @@ class BaseConfigResource(BaseResource, ABC):
         response = client._request(request)
         payload = client._handle_response(response.status_code, response.text, client._maybe_json(response))
 
-        return [cls._from_model(client, item) for item in cls._parse_list(payload)]
+        return cls._parse_list(payload)
 
     @classmethod
     def _get_resource(cls, client: "SyncClient", facility_id: str, resource_id: str) -> Self:

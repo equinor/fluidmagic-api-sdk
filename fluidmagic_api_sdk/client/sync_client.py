@@ -2,6 +2,7 @@ from typing import Any
 
 import httpx
 
+from ..resources.eos import EOS
 from ..resources.facility import Facility
 from .base_client import BaseClient
 
@@ -119,17 +120,13 @@ class Client(BaseClient):
         )
 
     # Public API methods
-    def list_facilities(self, name: str | None = None, component_count: int | None = None) -> list[Facility]:
+    def list_facilities(self) -> list[Facility]:
         """Get a list of facilities.
-
-        Args:
-            name: Optional name filter for facilities. Entire or partial name, case insensitive.
-            component_count: Optional component count filter for facilities.
 
         Returns:
             List of facility resources.
         """
-        return Facility._list_resources(self, name, component_count)
+        return Facility._list_resources(self)
 
     def get_facility(self, facility_id: str) -> Facility:
         """Get a facility by ID.
@@ -141,3 +138,16 @@ class Client(BaseClient):
             FacilityResource: The facility resource.
         """
         return Facility._get_resource(self, facility_id)
+
+    def list_eoses(self, facility_id: str, name: str = None, component_count: int = None) -> list[Facility]:
+        """Get a list of EOSs in a facility.
+
+        Args:
+            facility_id: The ID of the facility to list EOSs from.
+            name: Optional name filter for EOSs.
+            component_count: Optional component count filter for EOSs.
+
+        Returns:
+            List of EOS resources.
+        """
+        return EOS._list_resources(self, facility_id, name=name, component_count=component_count)

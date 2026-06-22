@@ -1,10 +1,14 @@
-from typing import Any
+from typing import Any, ClassVar
 
-from fluidmagic_api_sdk.models.fluid_models import FluidCreateModel, FluidModel
+from pydantic import BaseModel
+
+from fluidmagic_api_sdk.models.fluid_models import FluidCreateModel, FluidModel, FluidOverviewModel
 from fluidmagic_api_sdk.resources.base import BaseConfigResource
 
 
 class Fluid(FluidModel, BaseConfigResource):
+    _list_model: ClassVar[BaseModel] = FluidOverviewModel
+
     @classmethod
     def _build_list_request(
         cls, facility_id: str, name: str | None = None, component_count: int | None = None

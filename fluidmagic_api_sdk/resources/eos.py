@@ -1,12 +1,16 @@
-from typing import Any
+from typing import Any, ClassVar
+
+from pydantic import BaseModel
 
 from fluidmagic_api_sdk.models.data_models.calculated import FlashCalculated
-from fluidmagic_api_sdk.models.eos_models import EOSCreateModel, EOSModel
+from fluidmagic_api_sdk.models.eos_models import EOSCreateModel, EOSModel, EOSOverviewModel
 from fluidmagic_api_sdk.models.simulate_models import FlashCalculationRequestModel
 from fluidmagic_api_sdk.resources.base import BaseConfigResource
 
 
 class EOS(EOSModel, BaseConfigResource):
+    _list_model: ClassVar[BaseModel] = EOSOverviewModel
+
     @classmethod
     def _build_list_request(
         cls, facility_id: str, name: str | None = None, component_count: int | None = None

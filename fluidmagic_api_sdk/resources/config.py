@@ -3,6 +3,7 @@ from typing import Any, Self
 from fluidmagic_api_sdk.models.config_models import (
     ConfigModel,
     ConfigReturnModel,
+    ConfigType,
     MolesToVolCreateModel,
     MolesToVolRunInput,
     RateToMolesCreateModel,
@@ -115,7 +116,7 @@ class Config(ConfigModel, BaseConfigResource):
         Returns:
             The conversion results as FrameData.
         """
-        if self.config_type != "RATE_TO_MOLES":
+        if self.config_type != ConfigType.RATE_TO_MOLES:
             raise ValueError("Config model is not of type RATE_TO_MOLES")
 
         request = self._build_run_rate_to_moles_request(self.facility_id, self.id, input)
@@ -132,7 +133,7 @@ class Config(ConfigModel, BaseConfigResource):
         Returns:
             The conversion results as FrameData.
         """
-        if self.config_type != "MOLES_TO_VOL":
+        if self.config_type != ConfigType.MOLES_TO_VOL:
             raise ValueError("This Config model is not of type MOLES_TO_VOL.")
 
         request = self._build_run_moles_to_vol_request(self.facility_id, self.id, input)

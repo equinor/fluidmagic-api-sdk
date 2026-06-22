@@ -1,10 +1,14 @@
-from typing import Any
+from typing import Any, ClassVar
 
-from fluidmagic_api_sdk.models.process_models import ProcessCreateModel, ProcessModel
+from pydantic import BaseModel
+
+from fluidmagic_api_sdk.models.process_models import ProcessCreateModel, ProcessModel, ProcessOverviewModel
 from fluidmagic_api_sdk.resources.base import BaseConfigResource
 
 
 class Process(ProcessModel, BaseConfigResource):
+    _list_model: ClassVar[BaseModel] = ProcessOverviewModel
+
     @classmethod
     def _build_list_request(
         cls, facility_id: str, name: str | None = None, component_count: int | None = None
