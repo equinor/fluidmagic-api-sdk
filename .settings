@@ -1,0 +1,12 @@
+# Not secret environment variables for fluidmagic-api-sdk (safe to commit).
+
+# common
+tenant_id = "3aa4a235-b6e2-48d5-9195-7fcf05b459b0"
+
+# dev
+url_dev = "https://api-fluidmagic-api-dev.radix.equinor.com"
+resource_id_dev = "1a348f04-6b73-4cfb-9c02-c383d49f9c19"
+
+# prod
+url_prod = "https://api-fluidmagic-api-prod.radix.equinor.com"
+resource_id_prod = "c2c03b90-5743-4516-9c63-7dfe442966ed"
