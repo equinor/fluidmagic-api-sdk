@@ -99,12 +99,12 @@ class BaseClient(ABC):
         """Return the token and refresh if timed out."""
         return self._credentials.get_token(self._scope).token
 
-    def _auth_header(self) -> dict[str, str] | None:
-        """Return the authorization header."""
-        if not self._get_token():
-            return None
-        return {"Authorization": f"Bearer {self._get_token()}"}
-
+def _auth_header(self) -> dict[str, str] | None:
+    """Return the authorization header."""
+    token = self._get_token()
+    if not token:
+        return None
+    return {"Authorization": f"Bearer {token}"}
     def _merge_headers(self, headers: dict[str, str] | None) -> dict[str, str]:
         """Merge the default headers with the provided headers.
         Always include Accept: application/json and Authorization if token exists.
