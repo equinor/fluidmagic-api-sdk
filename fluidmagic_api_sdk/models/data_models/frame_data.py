@@ -247,7 +247,7 @@ class RateToMolFrameData(FrameData):
                     "headers": ["fluid_id", "oil_vol", "gas_vol", "liftgas_vol", "netgas_vol"],
                     "units": ["string", "sm3/d", "sm3/d", "sm3/d", "sm3/d"],
                     "index": ["2021-01-11 00:00:00", "2021-02-11 00:00:00"],
-                    "data": [["fluid1", 15, 1.01, 100, 50, 20, 30], ["fluid1", 90, 1.01, 100, 50, 20, 30]],
+                    "data": [["fluid1", 15, 1.01, 100, 50], ["fluid1", 90, 1.01, 100, 50]],
                 }
             ]
         }
