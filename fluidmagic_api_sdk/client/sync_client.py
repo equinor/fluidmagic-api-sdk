@@ -21,12 +21,17 @@ class Client(BaseClient):
         client_secret: str,
         base_url: str = None,
         environment: str = "prod",
-        headers: dict[str, str] = {},
+        headers: dict[str, str] = None,
         timeout: httpx.Timeout = httpx.Timeout(15),
         verify_ssl: bool = True,
         follow_redirects: bool = True,
-        httpx_args: dict[str, Any] = {},
+        httpx_args: dict[str, Any] = None,
     ):
+        if headers is None:
+            headers = {}
+        if httpx_args is None:
+            httpx_args = {}
+
         self = cls.__new__(cls)
         self._init_using_client_credentials(
             client_id=client_id,
@@ -56,12 +61,17 @@ class Client(BaseClient):
         base_url: str = None,
         redirect_uri: str = "http://localhost:8400",
         environment: str = "prod",
-        headers: dict[str, str] = {},
+        headers: dict[str, str] = None,
         timeout: httpx.Timeout = httpx.Timeout(15),
         verify_ssl: bool = True,
         follow_redirects: bool = True,
-        httpx_args: dict[str, Any] = {},
+        httpx_args: dict[str, Any] = None,
     ):
+        if headers is None:
+            headers = {}
+        if httpx_args is None:
+            httpx_args = {}
+
         self = cls.__new__(cls)
         self._init_using_interactive_login(
             client_id=client_id,
