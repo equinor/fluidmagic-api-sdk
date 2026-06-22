@@ -42,7 +42,22 @@ from fluidmagic_api_sdk.client.sync_client import Client
 client_id = "YOUR_CLIENT_ID"
 
 # Login interactively
-with Client.using_interactive_login(client_id, environment="dev") as client:
+with Client.using_interactive_login(client_id) as client:
+    facilities = client.list_facilities()
+    print(facilities)
+```
+
+### Working with the DEV Environment
+To connect to the DEV environment, specify the `environment` parameter when creating the client:
+
+```python
+from fluidmagic_api_sdk.client.sync_client import Client
+
+client_id = "YOUR_CLIENT_ID"
+client_secret = "YOUR_CLIENT_SECRET"
+
+# Create a client for the DEV environment
+with Client.using_client_credentials(client_id, client_secret, environment="dev") as client:
     facilities = client.list_facilities()
     print(facilities)
 ```

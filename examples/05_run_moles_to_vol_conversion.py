@@ -9,7 +9,6 @@ from fluidmagic_api_sdk.resources.process import ProcessCreateModel
 client_id = "CLIENT_ID"  # Replace with the client_id of your application
 client_secret = "CLIENT_SECRET"  # Replace with the client_secret of your application
 
-
 # ---- Running a Moles to Volume Conversion ----
 # This example demonstrates how to upload models, create a config, and run a conversion.
 
@@ -285,6 +284,32 @@ data = MolesToVolRunInput(
         ],
         "index": ["2021-01-11 00:00:00"],
         "units": ["kgmol/d" for _ in range(22)],
+        "data": [
+            [
+                0.005,
+                0.02,
+                0.25,
+                0.15,
+                0.10,
+                0.05,
+                0.05,
+                0.03,
+                0.03,
+                0.02,
+                0.02,
+                0.02,
+                0.02,
+                0.04,
+                0.05,
+                0.06,
+                0.07,
+                0.05,
+                0.03,
+                0.01,
+                0.005,
+                0.005,
+            ]
+        ],
     },
     output={
         "sep1": ["net_molarstream_*"],
