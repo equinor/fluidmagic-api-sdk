@@ -1,4 +1,4 @@
-from typing import Any, Self
+from typing import TYPE_CHECKING, Any, Self
 
 from fluidmagic_api_sdk.models.config_models import (
     ConfigModel,
@@ -10,10 +10,21 @@ from fluidmagic_api_sdk.models.config_models import (
     RateToMolesRunInput,
 )
 from fluidmagic_api_sdk.models.data_models.frame_data import FrameData
-from fluidmagic_api_sdk.resources.base import BaseConfigResource
+from fluidmagic_api_sdk.resources.base_resource import BaseConfigResource
+
+if TYPE_CHECKING:
+    from ..client.sync_client import Client as SyncClient
 
 
 class Config(ConfigModel, BaseConfigResource):
+
+    @classmethod
+    def _list_resources(
+        cls, client: "SyncClient", facility_id: str, name: str | None = None, component_count: int | None = None
+    ) -> list[ConfigModel]:
+        """List Config models."""
+        return cls._do_list_resources(client, facility_id, ConfigModel, name, component_count)
+
     @classmethod
     def _build_list_request(
         cls, facility_id: str, name: str | None = None, component_count: int | None = None

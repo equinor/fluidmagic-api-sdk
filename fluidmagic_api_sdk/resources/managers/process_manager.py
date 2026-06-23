@@ -1,11 +1,11 @@
-from fluidmagic_api_sdk.models.process_models import ProcessCreateModel
+from fluidmagic_api_sdk.models.process_models import ProcessCreateModel, ProcessOverviewModel
 from fluidmagic_api_sdk.resources.managers.base_manager import BaseManager
 from fluidmagic_api_sdk.resources.process import Process
 
 
 class ProcessManager(BaseManager):
 
-    def list(self, name: str | None = None, component_count: int | None = None) -> list["Process"]:
+    def list(self, name: str | None = None, component_count: int | None = None) -> list[ProcessOverviewModel]:
         """Get a list of Process models for this facility.
 
         Args:

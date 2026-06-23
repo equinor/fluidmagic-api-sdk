@@ -1,11 +1,11 @@
-from fluidmagic_api_sdk.models.eos_models import EOSCreateModel
+from fluidmagic_api_sdk.models.eos_models import EOSCreateModel, EOSOverviewModel
 from fluidmagic_api_sdk.resources.eos import EOS
 from fluidmagic_api_sdk.resources.managers.base_manager import BaseManager
 
 
 class EOSManager(BaseManager):
 
-    def list(self, name: str | None = None, component_count: int | None = None) -> list["EOS"]:
+    def list(self, name: str | None = None, component_count: int | None = None) -> list[EOSOverviewModel]:
         """Get a list of EOS models for this facility.
 
         Args:

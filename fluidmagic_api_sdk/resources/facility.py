@@ -7,14 +7,13 @@ from fluidmagic_api_sdk.resources.managers.fluid_manager import FluidManager
 from fluidmagic_api_sdk.resources.managers.process_manager import ProcessManager
 
 from ..models.facility_models import FacilityModel
-from ..resources.base import BaseResource
+from .base_resource import BaseResource
 
 if TYPE_CHECKING:
     from ..client.sync_client import Client as SyncClient
 
 
 class Facility(FacilityModel, BaseResource):
-    _list_model = FacilityModel
 
     @cached_property
     def eos(self):
@@ -56,12 +55,12 @@ class Facility(FacilityModel, BaseResource):
     @classmethod
     def _list_resources(
         cls, client: "SyncClient", name: str | None = None, component_count: int | None = None
-    ) -> list[Self]:
+    ) -> list["Facility"]:
         request = cls._build_list_request(name, component_count)
         response = client._request(request)
         payload = client._handle_response(response.status_code, response.text, client._maybe_json(response))
 
-        return [cls._from_model(client, item) for item in cls._parse_list(payload)]
+        return [cls._from_model(client, cls._parse_model(item)) for item in payload]
 
     @classmethod
     def _get_resource(cls, client: "SyncClient", facility_id: str) -> Self:

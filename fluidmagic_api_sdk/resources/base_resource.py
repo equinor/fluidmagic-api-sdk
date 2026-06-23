@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, ClassVar, Self
+from typing import TYPE_CHECKING, Any, Self, TypeVar
 
 from pydantic import BaseModel, PrivateAttr
 
@@ -15,13 +15,14 @@ if TYPE_CHECKING:
     from ..client.sync_client import Client as SyncClient
 
 
+ListModelT = TypeVar("ModelT", bound=BaseModel)
+
+
 # ========== Synchronous Resource Models ==========#
 
 
 class BaseResource(BaseModel, ABC):
     _client: "SyncClient" = PrivateAttr()
-
-    _list_model: ClassVar[BaseModel] = None
 
     @classmethod
     def _from_model(cls, client: "SyncClient", model: BaseModel) -> Self:
@@ -34,8 +35,8 @@ class BaseResource(BaseModel, ABC):
         return cls.model_validate(payload)
 
     @classmethod
-    def _parse_list(cls, payload: list[dict]) -> list[Self]:
-        return [cls._list_model.model_validate(item) for item in payload]
+    def _parse_list(cls, payload: list[Any], list_model_type: type[ListModelT]) -> list[ListModelT]:
+        return [list_model_type.model_validate(item) for item in payload]
 
 
 class BaseConfigResource(BaseResource, ABC):
@@ -63,14 +64,20 @@ class BaseConfigResource(BaseResource, ABC):
         pass
 
     @classmethod
-    def _list_resources(
-        cls, client: "SyncClient", facility_id: str, name: str | None = None, component_count: int | None = None
-    ) -> list[Self]:
+    def _do_list_resources(
+        cls,
+        client: "SyncClient",
+        facility_id: str,
+        list_model_type: type[ListModelT],
+        name: str | None = None,
+        component_count: int | None = None,
+    ) -> list[ListModelT]:
+        """Helper to fetch and parse list of resources with a specific model class."""
         request = cls._build_list_request(facility_id, name, component_count)
         response = client._request(request)
         payload = client._handle_response(response.status_code, response.text, client._maybe_json(response))
 
-        return cls._parse_list(payload)
+        return cls._parse_list(payload, list_model_type)
 
     @classmethod
     def _get_resource(cls, client: "SyncClient", facility_id: str, resource_id: str) -> Self:
