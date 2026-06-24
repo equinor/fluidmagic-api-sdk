@@ -1,20 +1,19 @@
+from abc import ABC
 from typing import TYPE_CHECKING, Any
 
 from fluidmagic_api_sdk.models.fluid_models import FluidCreateModel, FluidModel, FluidOverviewModel
-from fluidmagic_api_sdk.resources.base_resource import BaseConfigResource
+from fluidmagic_api_sdk.resources.base_resource import (
+    BaseConfigResource,
+    BaseConfigResourceAsync,
+    BaseConfigResourceSync,
+)
 
 if TYPE_CHECKING:
+    from ..client.async_client import AsyncClient
     from ..client.sync_client import Client as SyncClient
 
 
-class Fluid(FluidModel, BaseConfigResource):
-
-    @classmethod
-    def _list_resources(
-        cls, client: "SyncClient", facility_id: str, name: str | None = None, component_count: int | None = None
-    ) -> list[FluidOverviewModel]:
-        """List Fluid models as overview models."""
-        return cls._do_list_resources(client, facility_id, FluidOverviewModel, name, component_count)
+class BaseFluid(FluidModel, BaseConfigResource, ABC):
 
     @classmethod
     def _build_list_request(
@@ -54,8 +53,30 @@ class Fluid(FluidModel, BaseConfigResource):
             "path": f"/facilities/{facility_id}/fluids/{id}",
         }
 
-    # ======== Public API methods ========= #
+
+class Fluid(BaseFluid, BaseConfigResourceSync):
+
+    @classmethod
+    def _list_resources(
+        cls, client: "SyncClient", facility_id: str, name: str | None = None, component_count: int | None = None
+    ) -> list[FluidOverviewModel]:
+        """List Fluid models as overview models."""
+        return cls._do_list_resources(client, facility_id, FluidOverviewModel, name, component_count)
 
     def delete(self) -> None:
         """Delete this Fluid model."""
         Fluid._delete_resource(self._client, self.facility_id, self.id)
+
+
+class FluidAsync(BaseFluid, BaseConfigResourceAsync):
+
+    @classmethod
+    async def _list_resources_async(
+        cls, client: "AsyncClient", facility_id: str, name: str | None = None, component_count: int | None = None
+    ) -> list[FluidOverviewModel]:
+        """List Fluid models as overview models asynchronously."""
+        return await cls._do_list_resources_async(client, facility_id, FluidOverviewModel, name, component_count)
+
+    async def delete_async(self) -> None:
+        """Delete this Fluid model asynchronously."""
+        await FluidAsync._delete_resource_async(self._client, self.facility_id, self.id)
