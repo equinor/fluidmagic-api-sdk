@@ -2,6 +2,7 @@
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from fluidmagic_api_sdk.models.data_models.eos_data import EOSData
 from fluidmagic_api_sdk.models.data_models.pvt_data import PVTData
 
 
@@ -30,9 +31,9 @@ class FlashCalculationRequestModel(BaseModel):
 
         return self
 
-    def to_pvt_data(self, EOSData):
+    def to_pvt_data(self, eos_data: EOSData) -> PVTData:
         return PVTData(
-            eos_model=EOSData,
+            eos_model=eos_data,
             molarcomp=self.molar_composition,
             temperatures=self.temperatures,
             pressures=self.pressures,

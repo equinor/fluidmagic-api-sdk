@@ -109,7 +109,7 @@ class Config(ConfigModel, BaseConfigResource):
         }
 
     @classmethod
-    def _parse_run_result(cls, payload: dict) -> dict:
+    def _parse_run_result(cls, payload: dict) -> FrameData:
         return FrameData.model_validate(payload)
 
     # ======== Public API methods ========= #

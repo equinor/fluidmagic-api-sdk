@@ -40,7 +40,7 @@ class Fluid(FluidModel, BaseConfigResource):
         }
 
     @classmethod
-    def _build_create_request(self, facility_id: str, create_model: FluidCreateModel) -> dict[str, Any]:
+    def _build_create_request(cls, facility_id: str, create_model: FluidCreateModel) -> dict[str, Any]:
         return {
             "method": "POST",
             "path": f"/facilities/{facility_id}/fluids",
