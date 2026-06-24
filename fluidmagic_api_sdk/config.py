@@ -9,6 +9,7 @@ settings_file = ROOT_DIR / ".settings"
 if settings_file.exists():
     load_dotenv(settings_file)
 
+
 @dataclass
 class Settings:
     url_prod: str = os.getenv("url_prod")

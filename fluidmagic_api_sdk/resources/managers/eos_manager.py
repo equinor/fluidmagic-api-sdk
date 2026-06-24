@@ -1,11 +1,11 @@
-from fluidmagic_api_sdk.models.eos_models import EOSCreateModel
+from fluidmagic_api_sdk.models.eos_models import EOSCreateModel, EOSOverviewModel
 from fluidmagic_api_sdk.resources.eos import EOS
 from fluidmagic_api_sdk.resources.managers.base_manager import BaseManager
 
 
 class EOSManager(BaseManager):
 
-    def list(self, name: str | None = None, component_count: int | None = None) -> list["EOS"]:
+    def list(self, name: str | None = None, component_count: int | None = None) -> list[EOSOverviewModel]:
         """Get a list of EOS models for this facility.
 
         Args:
@@ -13,7 +13,7 @@ class EOSManager(BaseManager):
             component_count: Optional component count filter for EOS models.
 
         Returns:
-            List of EOS resources.
+            List of EOS overview models.
         """
         return EOS._list_resources(self._client, self._facility_id, name, component_count)
 

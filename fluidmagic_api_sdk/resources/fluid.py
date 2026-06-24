@@ -1,13 +1,20 @@
-from typing import Any, ClassVar
-
-from pydantic import BaseModel
+from typing import TYPE_CHECKING, Any
 
 from fluidmagic_api_sdk.models.fluid_models import FluidCreateModel, FluidModel, FluidOverviewModel
-from fluidmagic_api_sdk.resources.base import BaseConfigResource
+from fluidmagic_api_sdk.resources.base_resource import BaseConfigResource
+
+if TYPE_CHECKING:
+    from ..client.sync_client import Client as SyncClient
 
 
 class Fluid(FluidModel, BaseConfigResource):
-    _list_model: ClassVar[BaseModel] = FluidOverviewModel
+
+    @classmethod
+    def _list_resources(
+        cls, client: "SyncClient", facility_id: str, name: str | None = None, component_count: int | None = None
+    ) -> list[FluidOverviewModel]:
+        """List Fluid models as overview models."""
+        return cls._do_list_resources(client, facility_id, FluidOverviewModel, name, component_count)
 
     @classmethod
     def _build_list_request(
@@ -33,7 +40,7 @@ class Fluid(FluidModel, BaseConfigResource):
         }
 
     @classmethod
-    def _build_create_request(self, facility_id: str, create_model: FluidCreateModel) -> dict[str, Any]:
+    def _build_create_request(cls, facility_id: str, create_model: FluidCreateModel) -> dict[str, Any]:
         return {
             "method": "POST",
             "path": f"/facilities/{facility_id}/fluids",

@@ -1,13 +1,20 @@
-from typing import Any, ClassVar
-
-from pydantic import BaseModel
+from typing import TYPE_CHECKING, Any
 
 from fluidmagic_api_sdk.models.process_models import ProcessCreateModel, ProcessModel, ProcessOverviewModel
-from fluidmagic_api_sdk.resources.base import BaseConfigResource
+from fluidmagic_api_sdk.resources.base_resource import BaseConfigResource
+
+if TYPE_CHECKING:
+    from ..client.sync_client import Client as SyncClient
 
 
 class Process(ProcessModel, BaseConfigResource):
-    _list_model: ClassVar[BaseModel] = ProcessOverviewModel
+
+    @classmethod
+    def _list_resources(
+        cls, client: "SyncClient", facility_id: str, name: str | None = None, component_count: int | None = None
+    ) -> list[ProcessOverviewModel]:
+        """List Process models as overview models."""
+        return cls._do_list_resources(client, facility_id, ProcessOverviewModel, name, component_count)
 
     @classmethod
     def _build_list_request(

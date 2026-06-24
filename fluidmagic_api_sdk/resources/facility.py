@@ -7,14 +7,13 @@ from fluidmagic_api_sdk.resources.managers.fluid_manager import FluidManager
 from fluidmagic_api_sdk.resources.managers.process_manager import ProcessManager
 
 from ..models.facility_models import FacilityModel
-from ..resources.base import BaseResource
+from .base_resource import BaseResource
 
 if TYPE_CHECKING:
     from ..client.sync_client import Client as SyncClient
 
 
 class Facility(FacilityModel, BaseResource):
-    _list_model = FacilityModel
 
     @cached_property
     def eos(self):

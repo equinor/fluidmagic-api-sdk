@@ -3,7 +3,7 @@ Python SDK for accessing and working with the FluidMagic API:
 
 DEV: https://api-fluidmagic-api-dev.radix.equinor.com/docs#/
 
-PROD: https://api-fluidmagic-api.radix.equinor.com/docs#/
+PROD: https://api-fluidmagic-api-prod.radix.equinor.com/docs#/
 
 ## Installation
 

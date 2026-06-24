@@ -1,11 +1,11 @@
-from fluidmagic_api_sdk.models.config_models import MolesToVolCreateModel, RateToMolesCreateModel
+from fluidmagic_api_sdk.models.config_models import ConfigModel, MolesToVolCreateModel, RateToMolesCreateModel
 from fluidmagic_api_sdk.resources.config import Config
 from fluidmagic_api_sdk.resources.managers.base_manager import BaseManager
 
 
 class ConfigManager(BaseManager):
 
-    def list(self, name: str | None = None, component_count: int | None = None) -> list["Config"]:
+    def list(self, name: str | None = None, component_count: int | None = None) -> list[ConfigModel]:
         """Get a list of Config models for this facility.
 
         Args:
@@ -13,7 +13,7 @@ class ConfigManager(BaseManager):
             component_count: Optional component count filter for Config models.
 
         Returns:
-            List of Config resources.
+            List of Config models.
         """
         return Config._list_resources(self._client, self._facility_id, name, component_count)
 

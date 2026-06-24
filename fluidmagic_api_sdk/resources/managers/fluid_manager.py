@@ -1,10 +1,10 @@
-from fluidmagic_api_sdk.models.fluid_models import FluidCreateModel
+from fluidmagic_api_sdk.models.fluid_models import FluidCreateModel, FluidOverviewModel
 from fluidmagic_api_sdk.resources.fluid import Fluid
 from fluidmagic_api_sdk.resources.managers.base_manager import BaseManager
 
 
 class FluidManager(BaseManager):
-    def list(self, name: str | None = None, component_count: int | None = None) -> list["Fluid"]:
+    def list(self, name: str | None = None, component_count: int | None = None) -> list[FluidOverviewModel]:
         """Get a list of Fluid models for this facility.
 
         Args:
@@ -12,7 +12,7 @@ class FluidManager(BaseManager):
             component_count: Optional component count filter for Fluid models.
 
         Returns:
-            List of Fluid resources.
+            List of Fluid overview models.
         """
         return Fluid._list_resources(self._client, self._facility_id, name, component_count)
 
