@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Self, TypeVar
 from pydantic import BaseModel, PrivateAttr
 
 from ..client.core import requests, responses
-from ..models.config_models import ConfigModel
+from ..models.config_models import BaseConfigCreateModel, ConfigModel, ConfigType
 from ..models.data_models.calculated import FlashCalculated
 from ..models.eos_models import EOSCreateModel, EOSModel
 from ..models.facility_models import FacilityModel
@@ -104,9 +104,11 @@ class BaseConfigResource(BaseResource, ABC):
 
 class FacilityResource(FacilityModel, BaseResource):
 
-    def get_configs(self, name: str | None = None, component_count: int | None = None) -> list["ConfigResource"]:
+    def get_configs(
+        self, name: str | None = None, component_count: int | None = None, config_type: ConfigType | None = None
+    ) -> list["ConfigResource"]:
         """Get all Config models for this facility."""
-        request = requests.build_list_configs(self.id, name, component_count)
+        request = requests.build_list_configs(self.id, name, component_count, config_type=None)
         response = self._client._request(request)
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
 
@@ -120,7 +122,7 @@ class FacilityResource(FacilityModel, BaseResource):
 
         return ConfigResource._from_model(self._client, responses.parse_config(payload))
 
-    def create_config(self, config_create_model: "ConfigModel") -> "ConfigResource":
+    def create_config(self, config_create_model: BaseConfigCreateModel) -> "ConfigResource":
         """Create a new Config model for this facility."""
         request = requests.build_create_config(self.id, config_create_model)
         response = self._client._request(request)

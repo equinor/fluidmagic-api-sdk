@@ -1,5 +1,6 @@
 from typing import Any
 
+from fluidmagic_api_sdk.models.config_models import BaseConfigCreateModel, ConfigType
 from fluidmagic_api_sdk.models.eos_models import EOSCreateModel
 from fluidmagic_api_sdk.models.fluid_models import FluidCreateModel
 from fluidmagic_api_sdk.models.process_models import ProcessCreateModel
@@ -129,11 +130,15 @@ def build_delete_fluid(facility_id: str, fluid_id: str) -> dict[str, Any]:
     }
 
 
-def build_list_configs(facility_id: str, name: str | None = None, config_type: str | None = None) -> dict[str, Any]:
+def build_list_configs(
+    facility_id: str, name: str | None = None, component_count: int | None = None, config_type: ConfigType | None = None
+) -> dict[str, Any]:
     """Build the request payload for listing Config models for a facility."""
     params = {}
     if name is not None:
         params["name"] = name
+    if component_count is not None:
+        params["component_count"] = component_count
     if config_type is not None:
         params["config_type"] = config_type
 
@@ -152,9 +157,9 @@ def build_get_config(facility_id: str, config_id: str) -> dict[str, Any]:
     }
 
 
-def build_create_config(facility_id: str, body: dict[str, Any]) -> dict[str, Any]:
+def build_create_config(facility_id: str, config: BaseConfigCreateModel) -> dict[str, Any]:
     """Build the request payload for creating a new Config model."""
-    return {"method": "POST", "path": f"/facilities/{facility_id}/configs", "body": body}
+    return {"method": "POST", "path": f"/facilities/{facility_id}/configs", "body": config.model_dump()}
 
 
 def build_delete_config(facility_id: str, config_id: str) -> dict[str, Any]:
