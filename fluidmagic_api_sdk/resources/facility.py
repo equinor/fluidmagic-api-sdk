@@ -55,12 +55,12 @@ class Facility(FacilityModel, BaseResource):
     @classmethod
     def _list_resources(
         cls, client: "SyncClient", name: str | None = None, component_count: int | None = None
-    ) -> list["Facility"]:
+    ) -> list[Self]:
         request = cls._build_list_request(name, component_count)
         response = client._request(request)
         payload = client._handle_response(response.status_code, response.text, client._maybe_json(response))
 
-        return [cls._from_model(client, cls._parse_model(item)) for item in payload]
+        return [cls._from_model(client, item) for item in cls._parse_list(payload)]
 
     @classmethod
     def _get_resource(cls, client: "SyncClient", facility_id: str) -> Self:

@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Any, Self, TypeVar
 from pydantic import BaseModel, PrivateAttr
 
 from ..client.core import requests, responses
-from ..models.config_models import BaseConfigCreateModel, ConfigModel, ConfigType
 from ..models.data_models.calculated import FlashCalculated
 from ..models.eos_models import EOSCreateModel, EOSModel
 from ..models.facility_models import FacilityModel
@@ -100,52 +99,6 @@ class BaseConfigResource(BaseResource, ABC):
         request = cls._build_delete_request(facility_id, resource_id)
         response = client._request(request)
         client._handle_response(response.status_code, response.text, client._maybe_json(response))
-
-
-class FacilityResource(FacilityModel, BaseResource):
-
-    def get_configs(
-        self, name: str | None = None, component_count: int | None = None, config_type: ConfigType | None = None
-    ) -> list["ConfigResource"]:
-        """Get all Config models for this facility."""
-        request = requests.build_list_configs(self.id, name, component_count, config_type=None)
-        response = self._client._request(request)
-        payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
-
-        return [ConfigResource._from_model(self._client, item) for item in responses.parse_config_list(payload)]
-
-    def get_config(self, config_id: str) -> "ConfigResource":
-        """Get a specific Config model by ID for this facility."""
-        request = requests.build_get_config(self.id, config_id)
-        response = self._client._request(request)
-        payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
-
-        return ConfigResource._from_model(self._client, responses.parse_config(payload))
-
-    def create_config(self, config_create_model: BaseConfigCreateModel) -> "ConfigResource":
-        """Create a new Config model for this facility."""
-        request = requests.build_create_config(self.id, config_create_model)
-        response = self._client._request(request)
-        payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
-
-        return ConfigResource._from_model(self._client, responses.parse_config(payload))
-
-    def delete_config(self, config_id: str) -> None:
-        """Delete a specific Config model by ID for this facility."""
-        ConfigResource._delete(self._client, self.id, config_id)
-
-
-class ConfigResource(ConfigModel, BaseConfigResource):
-    @classmethod
-    def _delete(client: "SyncClient", facility_id: str, config_id: str) -> None:
-        """Delete a specific Config model by ID for a facility."""
-        request = requests.build_delete_config(facility_id, config_id)
-        response = client._request(request)
-        client._handle_response(response.status_code, response.text, client._maybe_json(response))
-
-    def delete(self) -> None:
-        """Delete this Config model."""
-        self._delete(self._client, self.facility_id, self.id)
 
 
 # ========== Asynchronous Resource Models ==========#

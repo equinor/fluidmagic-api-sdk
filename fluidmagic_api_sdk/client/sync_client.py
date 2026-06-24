@@ -144,6 +144,6 @@ class Client(BaseClient):
             facility_id: The ID of the facility to retrieve.
 
         Returns:
-            FacilityResource: The facility resource.
+            Facility: The facility resource.
         """
         return Facility._get_resource(self, facility_id)
