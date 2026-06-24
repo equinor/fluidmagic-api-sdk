@@ -12,7 +12,7 @@ class FluidManager(BaseManager):
             component_count: Optional component count filter for Fluid models.
 
         Returns:
-            List of Fluid resources.
+            List of Fluid overview models.
         """
         return Fluid._list_resources(self._client, self._facility_id, name, component_count)
 

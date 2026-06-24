@@ -13,7 +13,7 @@ class EOSManager(BaseManager):
             component_count: Optional component count filter for EOS models.
 
         Returns:
-            List of EOS resources.
+            List of EOS overview models.
         """
         return EOS._list_resources(self._client, self._facility_id, name, component_count)
 

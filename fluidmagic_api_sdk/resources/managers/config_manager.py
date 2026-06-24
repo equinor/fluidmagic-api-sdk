@@ -13,7 +13,7 @@ class ConfigManager(BaseManager):
             component_count: Optional component count filter for Config models.
 
         Returns:
-            List of Config resources.
+            List of Config models.
         """
         return Config._list_resources(self._client, self._facility_id, name, component_count)
 

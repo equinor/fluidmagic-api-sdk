@@ -13,7 +13,7 @@ class ProcessManager(BaseManager):
             component_count: Optional component count filter for Process models.
 
         Returns:
-            List of Process resources.
+            List of Process overview models.
         """
         return Process._list_resources(self._client, self._facility_id, name, component_count)
 
