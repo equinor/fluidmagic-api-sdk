@@ -1,22 +1,21 @@
+from abc import ABC
 from typing import TYPE_CHECKING, Any
 
 from fluidmagic_api_sdk.models.data_models.calculated import FlashCalculated
 from fluidmagic_api_sdk.models.eos_models import EOSCreateModel, EOSModel, EOSOverviewModel
 from fluidmagic_api_sdk.models.simulate_models import FlashCalculationRequestModel
-from fluidmagic_api_sdk.resources.base_resource import BaseConfigResource
+from fluidmagic_api_sdk.resources.base_resource import (
+    BaseConfigResource,
+    BaseConfigResourceAsync,
+    BaseConfigResourceSync,
+)
 
 if TYPE_CHECKING:
+    from ..client.async_client import AsyncClient
     from ..client.sync_client import Client as SyncClient
 
 
-class EOS(EOSModel, BaseConfigResource):
-
-    @classmethod
-    def _list_resources(
-        cls, client: "SyncClient", facility_id: str, name: str | None = None, component_count: int | None = None
-    ) -> list[EOSOverviewModel]:
-        """List EOS models as overview models."""
-        return cls._do_list_resources(client, facility_id, EOSOverviewModel, name, component_count)
+class BaseEOS(EOSModel, BaseConfigResource, ABC):
 
     @classmethod
     def _build_list_request(
@@ -70,6 +69,16 @@ class EOS(EOSModel, BaseConfigResource):
     def _parse_flash_result(cls, payload: dict) -> FlashCalculated:
         return FlashCalculated.model_validate(payload)
 
+
+class EOS(BaseEOS, BaseConfigResourceSync):
+
+    @classmethod
+    def _list_resources(
+        cls, client: "SyncClient", facility_id: str, name: str | None = None, component_count: int | None = None
+    ) -> list[EOSOverviewModel]:
+        """List EOS models as overview models."""
+        return cls._do_list_resources(client, facility_id, EOSOverviewModel, name, component_count)
+
     # ========= Public API methods ========= #
 
     def delete(self) -> None:
@@ -98,5 +107,35 @@ class EOS(EOSModel, BaseConfigResource):
 
         request = self._build_simulate_flash_request(self.facility_id, self.id, input_data)
         response = self._client._request(request)
+        payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
+        return self._parse_flash_result(payload)
+
+
+class EOSAsync(BaseEOS, BaseConfigResourceAsync):
+
+    @classmethod
+    async def _list_resources_async(
+        cls, client: "AsyncClient", facility_id: str, name: str | None = None, component_count: int | None = None
+    ) -> list[EOSOverviewModel]:
+        """List EOS models as overview models asynchronously."""
+        return await cls._do_list_resources_async(client, facility_id, EOSOverviewModel, name, component_count)
+
+    async def delete(self) -> None:
+        """Delete this EOS model asynchronously."""
+        await EOSAsync._delete_resource_async(self._client, self.facility_id, self.id)
+
+    async def simulate_flash(
+        self, molar_composition: list[float], temperature_conditions: list[float], pressure_conditions: list[float]
+    ) -> FlashCalculated:
+        """Simulate a flash calculation asynchronously using this EOS model."""
+
+        input_data = FlashCalculationRequestModel(
+            molar_composition=molar_composition,
+            temperatures=temperature_conditions,
+            pressures=pressure_conditions,
+        )
+
+        request = self._build_simulate_flash_request(self.facility_id, self.id, input_data)
+        response = await self._client._request(request)
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
         return self._parse_flash_result(payload)

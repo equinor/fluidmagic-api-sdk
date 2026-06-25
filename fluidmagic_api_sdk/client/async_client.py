@@ -1,10 +1,9 @@
-from typing import Any
+from typing import Any, Self
 
 import httpx
 
-from ..resources.base import AsyncFacilityResource
+from ..resources.async_facility import AsyncFacility
 from .base_client import BaseClient
-from .core import requests, responses
 
 
 class AsyncClient(BaseClient):
@@ -95,16 +94,12 @@ class AsyncClient(BaseClient):
         )
         return self
 
-    async def aclose(self) -> None:
-        """Close the underlying HTTP client."""
-        await self._http_client.aclose()
-
-    async def __aenter__(self) -> "AsyncClient":
-        """Enter the async context manager."""
+    async def __aenter__(self) -> Self:
+        """Enter the runtime context related to this object."""
         return self
 
     async def __aexit__(self, exc_type, exc, tb) -> None:
-        """Exit the async context manager.
+        """Exit the runtime context related to this object.
 
         Args:
             exc_type: The exception type.
@@ -114,7 +109,7 @@ class AsyncClient(BaseClient):
         await self.aclose()
 
     async def _request(self, request_dict: dict[str, Any]) -> httpx.Response:
-        """Make a request to the API.
+        """Make an async request to the API.
 
         Args:
             request_dict: Dictionary containing request parameters.
@@ -130,28 +125,26 @@ class AsyncClient(BaseClient):
             json=request_dict.get("body"),
         )
 
+    async def aclose(self) -> None:
+        """Close the underlying HTTP client."""
+        await self._http_client.aclose()
+
     # Public API methods
-    async def list_facilities(self) -> list[AsyncFacilityResource]:
+    async def list_facilities(self) -> list[AsyncFacility]:
         """Get a list of facilities.
 
         Returns:
             List of facility resources.
         """
-        response = await self._request(requests.build_list_facilities())
-        payload = self._handle_response(response.status_code, response.text, self._maybe_json(response))
+        return await AsyncFacility._list_resources_async(self)
 
-        return [AsyncFacilityResource._from_model(self, item) for item in responses.parse_facility_list(payload)]
-
-    async def get_facility(self, facility_id: str) -> AsyncFacilityResource:
+    async def get_facility(self, facility_id: str):
         """Get a facility by ID.
 
         Args:
             facility_id: The ID of the facility to retrieve.
 
         Returns:
-            FacilityResource: The facility resource.
+            Facility: The facility resource.
         """
-        response = await self._request(requests.build_get_facility(facility_id))
-        payload = self._handle_response(response.status_code, response.text, self._maybe_json(response))
-
-        return AsyncFacilityResource._from_model(self, responses.parse_facility(payload))
+        return await AsyncFacility._get_resource_async(self, facility_id)
