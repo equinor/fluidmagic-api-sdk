@@ -1,6 +1,7 @@
 from functools import cached_property
 from typing import TYPE_CHECKING, Self
 
+from fluidmagic_api_sdk.models.facility_models import FacilityModel
 from fluidmagic_api_sdk.resources.facility import Facility
 from fluidmagic_api_sdk.resources.managers.async_config_manager import AsyncConfigManager
 from fluidmagic_api_sdk.resources.managers.async_eos_manager import AsyncEOSManager
@@ -36,7 +37,7 @@ class AsyncFacility(Facility):
         response = await client._request(request)
         payload = client._handle_response(response.status_code, response.text, client._maybe_json(response))
 
-        return [cls._from_model(client, item) for item in cls._parse_list(payload)]
+        return [cls._from_model(client, item) for item in cls._parse_list(payload, FacilityModel)]
 
     @classmethod
     async def _get_resource_async(cls, client: "AsyncClient", facility_id: str) -> Self:

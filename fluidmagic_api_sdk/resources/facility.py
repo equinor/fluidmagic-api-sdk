@@ -60,7 +60,7 @@ class Facility(FacilityModel, BaseResource):
         response = client._request(request)
         payload = client._handle_response(response.status_code, response.text, client._maybe_json(response))
 
-        return [cls._from_model(client, item) for item in cls._parse_list(payload)]
+        return [cls._from_model(client, item) for item in cls._parse_list(payload, FacilityModel)]
 
     @classmethod
     def _get_resource(cls, client: "SyncClient", facility_id: str) -> Self:

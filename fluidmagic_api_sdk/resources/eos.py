@@ -114,7 +114,7 @@ class EOS(BaseEOS, BaseConfigResourceSync):
 class EOSAsync(BaseEOS, BaseConfigResourceAsync):
 
     @classmethod
-    async def _list_resources(
+    async def _list_resources_async(
         cls, client: "AsyncClient", facility_id: str, name: str | None = None, component_count: int | None = None
     ) -> list[EOSOverviewModel]:
         """List EOS models as overview models asynchronously."""
