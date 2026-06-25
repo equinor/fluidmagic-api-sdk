@@ -1,4 +1,4 @@
-from fluidmagic_api_sdk.models.config_models import BaseConfigCreateModel, ConfigType
+from fluidmagic_api_sdk.models.config_models import BaseConfigCreateModel, ConfigModel, ConfigType
 from fluidmagic_api_sdk.resources.config import ConfigAsync
 from fluidmagic_api_sdk.resources.managers.async_base_manager import AsyncBaseManager
 
@@ -7,7 +7,7 @@ class AsyncConfigManager(AsyncBaseManager):
 
     async def list(
         self, name: str | None = None, component_count: int | None = None, config_type: ConfigType | None = None
-    ) -> list["ConfigAsync"]:
+    ) -> list[ConfigModel]:
         """Get a list of Config models for this facility.
 
         Args:

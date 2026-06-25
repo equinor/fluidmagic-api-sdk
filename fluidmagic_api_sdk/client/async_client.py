@@ -130,7 +130,7 @@ class AsyncClient(BaseClient):
         await self._http_client.aclose()
 
     # Public API methods
-    async def list_facilities(self) -> list:
+    async def list_facilities(self) -> list[AsyncFacility]:
         """Get a list of facilities.
 
         Returns:
