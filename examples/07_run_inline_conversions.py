@@ -1,6 +1,6 @@
 import json
 
-from inline_data import (
+from examples.inline_data import (
     characterization_input,
     eos_data,
     fluid,
@@ -9,7 +9,6 @@ from inline_data import (
     process_data,
     rate_to_moles_input,
 )
-
 from fluidmagic_api_sdk.client.sync_client import Client
 from fluidmagic_api_sdk.models.config_models import FluidFilterType
 

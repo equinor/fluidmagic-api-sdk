@@ -1,9 +1,8 @@
 import json
 
-from shared_data import eos_model, fluid_model, process_model, rate_to_moles_input
-
+from examples.shared_data import eos_model, fluid_model, process_model, rate_to_moles_input
 from fluidmagic_api_sdk.client.sync_client import Client
-from fluidmagic_api_sdk.models.config_models import RateToMolesCreateModel
+from fluidmagic_api_sdk.models.config_models import FluidFilterType, RateToMolesCreateModel
 
 client_id = "CLIENT_ID"  # Replace with the client_id of your application
 client_secret = "CLIENT_SECRET"  # Replace with the client_secret of your application
@@ -42,7 +41,7 @@ with Client.using_client_credentials(client_id, client_secret, environment="dev"
     print(f"Created Config with ID: {config.id}")
 
     # Run Rate to Moles Conversion
-    result = config.run_rate_to_moles(input=rate_to_moles_input, output="total")
+    result = config.run_rate_to_moles(input=rate_to_moles_input, output=FluidFilterType.ALL)
     print("Rate to Moles Conversion Result:")
     print(json.dumps(result.model_dump(), indent=2))
 

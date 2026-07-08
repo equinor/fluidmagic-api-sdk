@@ -1,5 +1,4 @@
-from shared_data import eos_model, moles_to_vol_input, moles_to_vol_output, process_model
-
+from examples.shared_data import eos_model, moles_to_vol_input, moles_to_vol_output, process_model
 from fluidmagic_api_sdk.client.sync_client import Client
 from fluidmagic_api_sdk.resources.config import MolesToVolCreateModel
 
