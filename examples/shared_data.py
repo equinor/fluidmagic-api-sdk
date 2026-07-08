@@ -1,7 +1,7 @@
 """Shared data definitions for resource-based conversion examples (examples 5 & 6)."""
 
 from fluidmagic_api_sdk.models.data_models.eos_data import EOSData
-from fluidmagic_api_sdk.models.data_models.frame_data import FluidLibFrameData
+from fluidmagic_api_sdk.models.data_models.frame_data import FluidLibFrameData, MolToVolFrameData, RateToMolFrameData
 from fluidmagic_api_sdk.models.data_models.process_data import ProcessData
 from fluidmagic_api_sdk.resources.eos import EOSCreateModel
 from fluidmagic_api_sdk.resources.fluid import FluidCreateModel
@@ -456,3 +456,94 @@ fluid_model = FluidCreateModel(
         ],
     ),
 )
+
+# Rate to Moles Input Data for example 6
+rate_to_moles_input = RateToMolFrameData(
+    headers=[
+        "fluid_id",
+        "oil_vol",
+        "gas_vol",
+        "liftgas_vol",
+        "netgas_vol",
+    ],
+    units=[
+        "string",
+        "sm3/d",
+        "sm3/d",
+        "sm3/d",
+        "sm3/d",
+    ],
+    index=["2021-01-11 00:00:00"],
+    data=[
+        [
+            "well1",
+            100.904,
+            100.0,
+            50.0,
+            100.2,
+        ],
+    ],
+)
+
+# Moles to Volume Input Data for example 5
+moles_to_vol_input = MolToVolFrameData(
+    data=[
+        [
+            0.005,
+            0.02,
+            0.25,
+            0.15,
+            0.10,
+            0.05,
+            0.05,
+            0.03,
+            0.03,
+            0.02,
+            0.02,
+            0.02,
+            0.02,
+            0.04,
+            0.05,
+            0.06,
+            0.07,
+            0.05,
+            0.03,
+            0.01,
+            0.005,
+            0.005,
+        ]
+    ],
+    headers=[
+        "molarstream_n2",
+        "molarstream_co2",
+        "molarstream_c1",
+        "molarstream_c2",
+        "molarstream_c3",
+        "molarstream_ic4",
+        "molarstream_c4",
+        "molarstream_ic5",
+        "molarstream_c5",
+        "molarstream_c6",
+        "molarstream_c7",
+        "molarstream_c8",
+        "molarstream_c9",
+        "molarstream_c10-c12",
+        "molarstream_c13-c14",
+        "molarstream_c15-c17",
+        "molarstream_c18-c21",
+        "molarstream_c22-c28",
+        "molarstream_c29-c36",
+        "molarstream_c37-c45",
+        "molarstream_c46-c58",
+        "molarstream_c59-c80",
+    ],
+    index=["2021-01-11 00:00:00"],
+    units=["kgmol/d" for _ in range(22)],
+)
+
+# Moles to Volume Output Filter for example 5
+moles_to_vol_output = {
+    "sep1": ["net_molarstream_*"],
+    "oiltank": ["oil_vol", "oil_mass", "oil_moles"],
+    "gastank": ["gas_vol", "gas_mass", "gas_moles"],
+}

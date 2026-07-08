@@ -1,10 +1,9 @@
 import json
 
-from shared_data import eos_model, fluid_model, process_model
+from shared_data import eos_model, fluid_model, process_model, rate_to_moles_input
 
 from fluidmagic_api_sdk.client.sync_client import Client
-from fluidmagic_api_sdk.models.config_models import RateToMolesCreateModel, RateToMolesRunInput
-from fluidmagic_api_sdk.models.data_models.frame_data import RateToMolFrameData
+from fluidmagic_api_sdk.models.config_models import RateToMolesCreateModel
 
 client_id = "CLIENT_ID"  # Replace with the client_id of your application
 client_secret = "CLIENT_SECRET"  # Replace with the client_secret of your application
@@ -12,37 +11,7 @@ client_secret = "CLIENT_SECRET"  # Replace with the client_secret of your applic
 
 # ---- Running a Rate to Moles Conversion ----
 # This example demonstrates how to upload models, create a config, and run a rate to moles conversion.
-# (EOS, Process, and Fluid models are imported from shared_data.py)
-
-# Define Input Data
-data = RateToMolFrameData(
-    headers=[
-        "fluid_id",
-        "oil_vol",
-        "gas_vol",
-        "liftgas_vol",
-        "netgas_vol",
-    ],
-    units=[
-        "string",
-        "sm3/d",
-        "sm3/d",
-        "sm3/d",
-        "sm3/d",
-    ],
-    index=["2021-01-11 00:00:00"],
-    data=[
-        [
-            "well1",
-            100.904,
-            100.0,
-            50.0,
-            100.2,
-        ],
-    ],
-)
-
-input_data = RateToMolesRunInput(input=data, output="total")
+# (EOS, Process, Fluid models, and input data are imported from shared_data.py)
 
 # Upload models, create config, and run conversion
 with Client.using_client_credentials(client_id, client_secret, environment="dev") as client:
@@ -73,7 +42,7 @@ with Client.using_client_credentials(client_id, client_secret, environment="dev"
     print(f"Created Config with ID: {config.id}")
 
     # Run Rate to Moles Conversion
-    result = config.run_rate_to_moles(input_data)
+    result = config.run_rate_to_moles(input=rate_to_moles_input, output="total")
     print("Rate to Moles Conversion Result:")
     print(json.dumps(result.model_dump(), indent=2))
 
