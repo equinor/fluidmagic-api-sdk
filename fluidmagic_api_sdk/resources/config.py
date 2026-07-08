@@ -5,12 +5,14 @@ from fluidmagic_api_sdk.models.config_models import (
     ConfigModel,
     ConfigReturnModel,
     ConfigType,
+    FluidFilterType,
     MolesToVolCreateModel,
     MolesToVolRunInput,
+    OutputFilterDict,
     RateToMolesCreateModel,
     RateToMolesRunInput,
 )
-from fluidmagic_api_sdk.models.data_models.frame_data import FrameData
+from fluidmagic_api_sdk.models.data_models.frame_data import FrameData, MolToVolFrameData, RateToMolFrameData
 from fluidmagic_api_sdk.resources.base_resource import (
     BaseConfigResource,
     BaseConfigResourceAsync,
@@ -124,11 +126,12 @@ class Config(BaseConfig, BaseConfigResourceSync):
         """Delete this Config model."""
         Config._delete_resource(self._client, self.facility_id, self.id)
 
-    def run_rate_to_moles(self, input: RateToMolesRunInput) -> FrameData:
+    def run_rate_to_moles(self, input: RateToMolFrameData, output: FluidFilterType = FluidFilterType.ALL) -> FrameData:
         """Run a Rate to Moles conversion using this Config model.
 
         Args:
-            input: The input data for the conversion.
+            input: The input frame data for the conversion.
+            output: The output filter type (default: FluidFilterType.ALL).
 
         Returns:
             The conversion results as FrameData.
@@ -136,16 +139,18 @@ class Config(BaseConfig, BaseConfigResourceSync):
         if self.config_type != ConfigType.RATE_TO_MOLES:
             raise ValueError("Config model is not of type RATE_TO_MOLES")
 
-        request = self._build_run_rate_to_moles_request(self.facility_id, self.id, input)
+        run_input = RateToMolesRunInput(input=input, output=output)
+        request = self._build_run_rate_to_moles_request(self.facility_id, self.id, run_input)
         response = self._client._request(request)
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
         return Config._parse_run_result(payload)
 
-    def run_moles_to_vol(self, input: MolesToVolRunInput) -> FrameData:
+    def run_moles_to_vol(self, input: MolToVolFrameData, output: OutputFilterDict | None = None) -> FrameData:
         """Run a Moles to Volume conversion using this Config model.
 
         Args:
-            input: The input data for the conversion.
+            input: The input frame data for the conversion.
+            output: The output filter configuration (optional).
 
         Returns:
             The conversion results as FrameData.
@@ -153,7 +158,8 @@ class Config(BaseConfig, BaseConfigResourceSync):
         if self.config_type != ConfigType.MOLES_TO_VOL:
             raise ValueError("This Config model is not of type MOLES_TO_VOL.")
 
-        request = self._build_run_moles_to_vol_request(self.facility_id, self.id, input)
+        run_input = MolesToVolRunInput(input=input, output=output)
+        request = self._build_run_moles_to_vol_request(self.facility_id, self.id, run_input)
         response = self._client._request(request)
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
         return Config._parse_run_result(payload)
@@ -185,22 +191,26 @@ class ConfigAsync(BaseConfig, BaseConfigResourceAsync):
         """Delete this Config model asynchronously."""
         await ConfigAsync._delete_resource_async(self._client, self.facility_id, self.id)
 
-    async def run_rate_to_moles(self, input: RateToMolesRunInput) -> FrameData:
+    async def run_rate_to_moles(
+        self, input: RateToMolFrameData, output: FluidFilterType = FluidFilterType.ALL
+    ) -> FrameData:
         """Run a Rate to Moles conversion asynchronously using this Config model."""
         if self.config_type != ConfigType.RATE_TO_MOLES:
             raise ValueError("Config model is not of type RATE_TO_MOLES")
 
-        request = self._build_run_rate_to_moles_request(self.facility_id, self.id, input)
+        run_input = RateToMolesRunInput(input=input, output=output)
+        request = self._build_run_rate_to_moles_request(self.facility_id, self.id, run_input)
         response = await self._client._request(request)
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
         return ConfigAsync._parse_run_result(payload)
 
-    async def run_moles_to_vol(self, input: MolesToVolRunInput) -> FrameData:
+    async def run_moles_to_vol(self, input: MolToVolFrameData, output: OutputFilterDict | None = None) -> FrameData:
         """Run a Moles to Volume conversion asynchronously using this Config model."""
         if self.config_type != ConfigType.MOLES_TO_VOL:
             raise ValueError("This Config model is not of type MOLES_TO_VOL.")
 
-        request = self._build_run_moles_to_vol_request(self.facility_id, self.id, input)
+        run_input = MolesToVolRunInput(input=input, output=output)
+        request = self._build_run_moles_to_vol_request(self.facility_id, self.id, run_input)
         response = await self._client._request(request)
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
         return ConfigAsync._parse_run_result(payload)

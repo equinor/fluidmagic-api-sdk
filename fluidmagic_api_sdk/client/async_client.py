@@ -1,8 +1,11 @@
+from functools import cached_property
 from typing import Any, Self
 
 import httpx
 
-from ..resources.async_facility import AsyncFacility
+from fluidmagic_api_sdk.resources.async_facility import AsyncFacility
+
+from ..resources.managers.conversions_manager import AsyncConversionsManager
 from .base_client import BaseClient
 
 
@@ -128,6 +131,10 @@ class AsyncClient(BaseClient):
     async def aclose(self) -> None:
         """Close the underlying HTTP client."""
         await self._http_client.aclose()
+
+    @cached_property
+    def conversions(self) -> AsyncConversionsManager:
+        return AsyncConversionsManager(self)
 
     # Public API methods
     async def list_facilities(self) -> list[AsyncFacility]:
