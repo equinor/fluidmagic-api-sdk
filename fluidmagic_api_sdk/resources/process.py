@@ -1,20 +1,19 @@
+from abc import ABC
 from typing import TYPE_CHECKING, Any
 
 from fluidmagic_api_sdk.models.process_models import ProcessCreateModel, ProcessModel, ProcessOverviewModel
-from fluidmagic_api_sdk.resources.base_resource import BaseConfigResource
+from fluidmagic_api_sdk.resources.base_resource import (
+    BaseConfigResource,
+    BaseConfigResourceAsync,
+    BaseConfigResourceSync,
+)
 
 if TYPE_CHECKING:
+    from ..client.async_client import AsyncClient
     from ..client.sync_client import Client as SyncClient
 
 
-class Process(ProcessModel, BaseConfigResource):
-
-    @classmethod
-    def _list_resources(
-        cls, client: "SyncClient", facility_id: str, name: str | None = None, component_count: int | None = None
-    ) -> list[ProcessOverviewModel]:
-        """List Process models as overview models."""
-        return cls._do_list_resources(client, facility_id, ProcessOverviewModel, name, component_count)
+class BaseProcess(ProcessModel, BaseConfigResource, ABC):
 
     @classmethod
     def _build_list_request(
@@ -54,8 +53,30 @@ class Process(ProcessModel, BaseConfigResource):
             "path": f"/facilities/{facility_id}/processes/{id}",
         }
 
-    # ======== Public API methods ========= #
+
+class Process(BaseProcess, BaseConfigResourceSync):
+
+    @classmethod
+    def _list_resources(
+        cls, client: "SyncClient", facility_id: str, name: str | None = None, component_count: int | None = None
+    ) -> list[ProcessOverviewModel]:
+        """List Process models as overview models."""
+        return cls._do_list_resources(client, facility_id, ProcessOverviewModel, name, component_count)
 
     def delete(self) -> None:
         """Delete this Process model."""
         Process._delete_resource(self._client, self.facility_id, self.id)
+
+
+class ProcessAsync(BaseProcess, BaseConfigResourceAsync):
+
+    @classmethod
+    async def _list_resources_async(
+        cls, client: "AsyncClient", facility_id: str, name: str | None = None, component_count: int | None = None
+    ) -> list[ProcessOverviewModel]:
+        """List Process models as overview models asynchronously."""
+        return await cls._do_list_resources_async(client, facility_id, ProcessOverviewModel, name, component_count)
+
+    async def delete_async(self) -> None:
+        """Delete this Process model asynchronously."""
+        await ProcessAsync._delete_resource_async(self._client, self.facility_id, self.id)
