@@ -1,8 +1,10 @@
+from functools import cached_property
 from typing import Any
 
 import httpx
 
-from ..resources.base import AsyncFacilityResource
+from ..resources.base_resource import AsyncFacilityResource
+from ..resources.managers.conversions_manager import AsyncConversionsManager
 from .base_client import BaseClient
 from .core import requests, responses
 
@@ -129,6 +131,10 @@ class AsyncClient(BaseClient):
             params=request_dict.get("params"),
             json=request_dict.get("body"),
         )
+
+    @cached_property
+    def conversions(self) -> AsyncConversionsManager:
+        return AsyncConversionsManager(self)
 
     # Public API methods
     async def list_facilities(self) -> list[AsyncFacilityResource]:

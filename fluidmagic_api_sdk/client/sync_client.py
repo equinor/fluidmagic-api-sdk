@@ -1,8 +1,10 @@
+from functools import cached_property
 from typing import Any
 
 import httpx
 
 from ..resources.facility import Facility
+from ..resources.managers.conversions_manager import ConversionsManager
 from .base_client import BaseClient
 
 
@@ -51,6 +53,7 @@ class Client(BaseClient):
             follow_redirects=self._follow_redirects,
             **self._httpx_args,
         )
+
         return self
 
     @classmethod
@@ -127,6 +130,10 @@ class Client(BaseClient):
             params=request_dict.get("params"),
             json=request_dict.get("body"),
         )
+
+    @cached_property
+    def conversions(self) -> ConversionsManager:
+        return ConversionsManager(self)
 
     # Public API methods
     def list_facilities(self) -> list[Facility]:
