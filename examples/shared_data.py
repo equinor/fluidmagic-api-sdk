@@ -161,6 +161,23 @@ eos_model = EOSCreateModel(
     ),
 )
 
+# Flash Simulation EOS Model used in example 4
+flash_eos_model = EOSCreateModel(
+    name="New EOS",
+    description="A new EOS model",
+    eos_data=EOSData(
+        eos_type="srk",
+        component_names=["c1", "c2", "c3-c4"],
+        molecular_weights=[16.04, 30.07, 58.12],
+        upper_molecular_weights=[16.04, 30.07, 58.12],
+        critical_temperatures=[190.6, 305.3, 425.2],
+        critical_pressures=[45.99, 48.72, 37.96],
+        acentric_factors=[0.008, 0.098, 0.193],
+        binary_interaction_parameters=[[0.0, 0.1, 0.2], [0.1, 0.0, 0.3], [0.2, 0.3, 0.0]],
+        volume_shifts=[0.0, 0.0, 0.0],
+    ),
+)
+
 # Common Process Model used in examples 5 & 6
 process_model = ProcessCreateModel(
     name="New Process",
