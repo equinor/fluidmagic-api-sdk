@@ -155,25 +155,25 @@ class SaturationPressureCalculated(BaseCalculated):
 class CMECalculated(BaseCalculated):
     """Class for CME calculation results."""
 
-    relative_total_volume: list[float] = Field(..., description="Relative total volume.")
-    compressibility: list[float] = Field(..., description="Compressibility.")
-    y_factor: list[float] = Field(..., description="Y-factor.")
-    density: list[float] = Field(..., description="Density.")
-    liquid_volume: list[float] = Field(..., description="Liquid volume.")
-    z_factor: list[float] = Field(..., description="Z-factor.")
-    equilibrium_gas_comp: list[list[float]] = Field(..., description="Equilibrium gas composition.")
-    equilibrium_oil_comp: list[list[float]] = Field(..., description="Equilibrium oil composition.")
+    relative_total_volume: list[float | None] = Field(..., description="Relative total volume.")
+    compressibility: list[float | None] = Field(..., description="Compressibility.")
+    y_factor: list[float | None] = Field(..., description="Y-factor.")
+    density: list[float | None] = Field(..., description="Density.")
+    liquid_volume: list[float | None] = Field(..., description="Liquid volume.")
+    z_factor: list[float | None] = Field(..., description="Z-factor.")
+    equilibrium_gas_comp: list[list[float | None]] = Field(..., description="Equilibrium gas composition.")
+    equilibrium_oil_comp: list[list[float | None]] = Field(..., description="Equilibrium oil composition.")
 
     def __init__(
         self,
-        relative_total_volume: npt.NDArray[np.float64] | list[float],
-        compressibility: npt.NDArray[np.float64] | list[float],
-        y_factor: npt.NDArray[np.float64] | list[float],
-        density: npt.NDArray[np.float64] | list[float],
-        liquid_volume: npt.NDArray[np.float64] | list[float],
-        z_factor: npt.NDArray[np.float64] | list[float],
-        equilibrium_gas_comp: npt.NDArray[np.float64] | list[list[float]],
-        equilibrium_oil_comp: npt.NDArray[np.float64] | list[list[float]],
+        relative_total_volume: npt.NDArray[np.float64] | list[float | None],
+        compressibility: npt.NDArray[np.float64] | list[float | None],
+        y_factor: npt.NDArray[np.float64] | list[float | None],
+        density: npt.NDArray[np.float64] | list[float | None],
+        liquid_volume: npt.NDArray[np.float64] | list[float | None],
+        z_factor: npt.NDArray[np.float64] | list[float | None],
+        equilibrium_gas_comp: npt.NDArray[np.float64] | list[list[float | None]],
+        equilibrium_oil_comp: npt.NDArray[np.float64] | list[list[float | None]],
         **kwargs,
     ):
         super().__init__(
@@ -204,25 +204,25 @@ class CMECalculated(BaseCalculated):
 class DLECalculated(BaseCalculated):
     """Class for DLE calculation results."""
 
-    oil_formation_volume_factor_dle: list[float] = Field(..., description="Oil formation volume factor (DLE).")
-    solution_gas_oil_ratio_dle: list[float] = Field(..., description="Solution gas-to-oil ratio (DLE).")
-    gas_formation_volume_factor: list[float] = Field(..., description="Gas formation volume factor.")
-    oil_density: list[float] = Field(..., description="Oil density.")
-    z_factor: list[float] = Field(..., description="Z-factor.")
-    gas_specific_gravity: list[float] = Field(..., description="Gas specific gravity.")
-    oil_viscosity: list[float] = Field(..., description="Oil viscosity.")
+    oil_formation_volume_factor_dle: list[float | None] = Field(..., description="Oil formation volume factor (DLE).")
+    solution_gas_oil_ratio_dle: list[float | None] = Field(..., description="Solution gas-to-oil ratio (DLE).")
+    gas_formation_volume_factor: list[float | None] = Field(..., description="Gas formation volume factor.")
+    oil_density: list[float | None] = Field(..., description="Oil density.")
+    z_factor: list[float | None] = Field(..., description="Z-factor.")
+    gas_specific_gravity: list[float | None] = Field(..., description="Gas specific gravity.")
+    oil_viscosity: list[float | None] = Field(..., description="Oil viscosity.")
     equilibrium_gas_comp: list[list[float]] = Field(..., description="Equilibrium gas composition.")
     equilibrium_oil_comp: list[list[float]] = Field(..., description="Equilibrium oil composition.")
 
     def __init__(
         self,
-        oil_formation_volume_factor_dle: npt.NDArray[np.float64] | list[float],
-        solution_gas_oil_ratio_dle: npt.NDArray[np.float64] | list[float],
-        gas_formation_volume_factor: npt.NDArray[np.float64] | list[float],
-        oil_density: npt.NDArray[np.float64] | list[float],
-        z_factor: npt.NDArray[np.float64] | list[float],
-        gas_specific_gravity: npt.NDArray[np.float64] | list[float],
-        oil_viscosity: npt.NDArray[np.float64] | list[float],
+        oil_formation_volume_factor_dle: npt.NDArray[np.float64] | list[float | None],
+        solution_gas_oil_ratio_dle: npt.NDArray[np.float64] | list[float | None],
+        gas_formation_volume_factor: npt.NDArray[np.float64] | list[float | None],
+        oil_density: npt.NDArray[np.float64] | list[float | None],
+        z_factor: npt.NDArray[np.float64] | list[float | None],
+        gas_specific_gravity: npt.NDArray[np.float64] | list[float | None],
+        oil_viscosity: npt.NDArray[np.float64] | list[float | None],
         equilibrium_gas_comp: npt.NDArray[np.float64] | list[list[float]],
         equilibrium_oil_comp: npt.NDArray[np.float64] | list[list[float]],
         **kwargs,
@@ -257,21 +257,21 @@ class DLECalculated(BaseCalculated):
 class SeparatorCalculated(BaseCalculated):
     """Class for separator calculation results."""
 
-    gas_oil_ratio: list[float] = Field(..., description="Gas-to-oil ratio.")
-    total_gas_oil_ratio: list[float] = Field(..., description="Total gas-to-oil ratio.")
-    gas_specific_gravity: list[float] = Field(..., description="Gas specific gravity.")
-    oil_density: list[float] = Field(..., description="Oil density.")
-    oil_formation_volume_factor: list[float] = Field(..., description="Oil formation volume factor.")
+    gas_oil_ratio: list[float | None] = Field(..., description="Gas-to-oil ratio.")
+    total_gas_oil_ratio: list[float | None] = Field(..., description="Total gas-to-oil ratio.")
+    gas_specific_gravity: list[float | None] = Field(..., description="Gas specific gravity.")
+    oil_density: list[float | None] = Field(..., description="Oil density.")
+    oil_formation_volume_factor: list[float | None] = Field(..., description="Oil formation volume factor.")
     equilibrium_gas_comp: list[list[float]] = Field(..., description="Equilibrium gas composition.")
     equilibrium_oil_comp: list[list[float]] = Field(..., description="Equilibrium oil composition.")
 
     def __init__(
         self,
-        gas_oil_ratio: npt.NDArray[np.float64] | list[float],
-        total_gas_oil_ratio: npt.NDArray[np.float64] | list[float],
-        gas_specific_gravity: npt.NDArray[np.float64] | list[float],
-        oil_density: npt.NDArray[np.float64] | list[float],
-        oil_formation_volume_factor: npt.NDArray[np.float64] | list[float],
+        gas_oil_ratio: npt.NDArray[np.float64] | list[float | None],
+        total_gas_oil_ratio: npt.NDArray[np.float64] | list[float | None],
+        gas_specific_gravity: npt.NDArray[np.float64] | list[float | None],
+        oil_density: npt.NDArray[np.float64] | list[float | None],
+        oil_formation_volume_factor: npt.NDArray[np.float64] | list[float | None],
         equilibrium_gas_comp: npt.NDArray[np.float64] | list[list[float]],
         equilibrium_oil_comp: npt.NDArray[np.float64] | list[list[float]],
         **kwargs,
@@ -302,29 +302,29 @@ class SeparatorCalculated(BaseCalculated):
 class CVDCalculated(BaseCalculated):
     """Class for CVD calculation results."""
 
-    liquid_volume: list[float] = Field(..., description="Liquid volume.")
-    moles_gas_produced: list[float] = Field(..., description="Moles of gas produced.")
-    z_factor: list[float] = Field(..., description="Z-factor.")
-    two_phase_z_factor: list[float] = Field(..., description="Two-phase Z-factor.")
-    oil_formation_volume_factor: list[float] = Field(..., description="Oil formation volume factor.")
-    solution_gas_oil_ratio: list[float] = Field(..., description="Solution gas-to-oil ratio.")
-    gas_formation_volume_factor: list[float] = Field(..., description="Gas formation volume factor.")
-    oil_density: list[float] = Field(..., description="Oil density.")
-    gas_specific_gravity: list[float] = Field(..., description="Gas specific gravity.")
+    liquid_volume: list[float | None] = Field(..., description="Liquid volume.")
+    moles_gas_produced: list[float | None] = Field(..., description="Moles of gas produced.")
+    z_factor: list[float | None] = Field(..., description="Z-factor.")
+    two_phase_z_factor: list[float | None] = Field(..., description="Two-phase Z-factor.")
+    oil_formation_volume_factor: list[float | None] = Field(..., description="Oil formation volume factor.")
+    solution_gas_oil_ratio: list[float | None] = Field(..., description="Solution gas-to-oil ratio.")
+    gas_formation_volume_factor: list[float | None] = Field(..., description="Gas formation volume factor.")
+    oil_density: list[float | None] = Field(..., description="Oil density.")
+    gas_specific_gravity: list[float | None] = Field(..., description="Gas specific gravity.")
     equilibrium_gas_comp: list[list[float]] = Field(..., description="Equilibrium gas composition.")
     equilibrium_oil_comp: list[list[float]] = Field(..., description="Equilibrium oil composition.")
 
     def __init__(
         self,
-        liquid_volume: npt.NDArray[np.float64] | list[float],
-        moles_gas_produced: npt.NDArray[np.float64] | list[float],
-        z_factor: npt.NDArray[np.float64] | list[float],
-        two_phase_z_factor: npt.NDArray[np.float64] | list[float],
-        oil_formation_volume_factor: npt.NDArray[np.float64] | list[float],
-        solution_gas_oil_ratio: npt.NDArray[np.float64] | list[float],
-        gas_formation_volume_factor: npt.NDArray[np.float64] | list[float],
-        oil_density: npt.NDArray[np.float64] | list[float],
-        gas_specific_gravity: npt.NDArray[np.float64] | list[float],
+        liquid_volume: npt.NDArray[np.float64] | list[float | None],
+        moles_gas_produced: npt.NDArray[np.float64] | list[float | None],
+        z_factor: npt.NDArray[np.float64] | list[float | None],
+        two_phase_z_factor: npt.NDArray[np.float64] | list[float | None],
+        oil_formation_volume_factor: npt.NDArray[np.float64] | list[float | None],
+        solution_gas_oil_ratio: npt.NDArray[np.float64] | list[float | None],
+        gas_formation_volume_factor: npt.NDArray[np.float64] | list[float | None],
+        oil_density: npt.NDArray[np.float64] | list[float | None],
+        gas_specific_gravity: npt.NDArray[np.float64] | list[float | None],
         equilibrium_gas_comp: npt.NDArray[np.float64] | list[list[float]],
         equilibrium_oil_comp: npt.NDArray[np.float64] | list[list[float]],
         **kwargs,

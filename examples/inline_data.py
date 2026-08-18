@@ -8,6 +8,7 @@ from fluidmagic_api_sdk.models.data_models.frame_data import (
     RateToMolFrameData,
 )
 from fluidmagic_api_sdk.models.data_models.process_data import ProcessData
+from fluidmagic_api_sdk.models.simulate_models import CMEMeasuredModel, CMEWeightsModel
 
 # EOS Data for inline conversions
 eos_data = EOSData(
@@ -621,4 +622,27 @@ flash_eos_data = EOSData(
     acentric_factors=[0.008, 0.098, 0.193],
     binary_interaction_parameters=[[0.0, 0.1, 0.2], [0.1, 0.0, 0.3], [0.2, 0.3, 0.0]],
     volume_shifts=[0.0, 0.0, 0.0],
+)
+
+# CME Simulation Data for inline simulations (example 8)
+cme_molar_composition = [0.05, 0.5, 0.2, 0.15, 0.06, 0.04]
+cme_pressures = [300, 250, 225, 204.99, 200, 175, 150, 100, 50, 20]
+cme_temperature = 100
+
+cme_measured = CMEMeasuredModel(
+    compressibility=[0.000199, 0.000228, 0.000245, 0.000261, None, None, None, None, None, None],
+    density=[666.878513, 659.8171507, 655.9286849, 652.6158943, None, None, None, None, None, None],
+    liquid_volume=[None, None, None, 100, 99.12, 95.11, 91.53, 84.97, 78, 71.68],
+    relative_total_volume=[0.9786, 0.9891, 0.9949, 1, 1.0081, 1.0595, 1.1368, 1.4563, 2.6104, 6.6119],
+    y_factor=[None, None, None, None, 3.1, 2.88, 2.68, 2.3, 1.92, 1.65],
+    z_factor=[None, None, None, None, None, None, None, None, None, None],
+)
+
+cme_weights = CMEWeightsModel(
+    compressibility=1,
+    density=1,
+    liquid_volume=1,
+    relative_total_volume=1,
+    y_factor=1,
+    z_factor=0,
 )

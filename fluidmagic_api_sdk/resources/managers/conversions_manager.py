@@ -8,6 +8,7 @@ from fluidmagic_api_sdk.models.config_models import (
 )
 from fluidmagic_api_sdk.models.convert_models import (
     LabToEosMolesRequestModel,
+    LabToEosMolesResponseModel,
     MolesToVolumeRequestModel,
     RateToMolesRequestModel,
 )
@@ -102,7 +103,7 @@ class ConversionsManager:
         self,
         eos: EOSData,
         input_data: FrameData,
-    ) -> FrameData:
+    ) -> LabToEosMolesResponseModel:
         """Run an inline lab-to-EOS-moles characterization without requiring pre-uploaded resources.
 
         Converts uncharacterized laboratory compositions into characterized molar compositions.
@@ -112,7 +113,7 @@ class ConversionsManager:
             input_data: Lab composition data with lab_* columns plus MWp and Alpha columns.
 
         Returns:
-            The characterized composition results as FrameData.
+            The characterized composition results as LabToEosMolesResponseModel.
         """
         request = LabToEosMolesRequestModel(eos=eos, input_data=input_data)
         response = self._client._request(
@@ -123,7 +124,7 @@ class ConversionsManager:
             }
         )
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
-        return FrameData.model_validate(payload)
+        return LabToEosMolesResponseModel.model_validate(payload)
 
 
 class AsyncConversionsManager:
@@ -191,7 +192,7 @@ class AsyncConversionsManager:
             }
         )
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
-        return FrameData.model_validate(payload)
+        return FrameData.model_validate(payload["characterized_fluid"])
 
     async def run_moles_to_volume(
         self,

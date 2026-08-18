@@ -51,3 +51,10 @@ class ComponentProcessFactorType(StrEnum):
 
     RECOVERY_FACTOR = "rectable"
     K_VALUE = "kvaltable"
+
+
+class MoleOrMass(NoCasingEnum):
+    """Mole to mass or mass to mole."""
+
+    MOLE_TO_MASS = "mole_to_mass"
+    MASS_TO_MOLE = "mass_to_mole"
