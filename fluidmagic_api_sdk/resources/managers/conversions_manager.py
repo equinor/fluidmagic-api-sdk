@@ -171,7 +171,7 @@ class AsyncConversionsManager:
         self,
         eos: EOSData,
         input_data: FrameData,
-    ) -> FrameData:
+    ) -> LabToEosMolesResponseModel:
         """Run an inline lab-to-EOS-moles characterization without requiring pre-uploaded resources.
 
         Converts uncharacterized laboratory compositions into characterized molar compositions.
@@ -181,7 +181,7 @@ class AsyncConversionsManager:
             input_data: Lab composition data with lab_* columns plus MWp and Alpha columns.
 
         Returns:
-            The characterized composition results as FrameData.
+            The characterized composition results as LabToEosMolesResponseModel.
         """
         request = LabToEosMolesRequestModel(eos=eos, input_data=input_data)
         response = await self._client._request(
@@ -192,7 +192,7 @@ class AsyncConversionsManager:
             }
         )
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
-        return FrameData.model_validate(payload["characterized_fluid"])
+        return LabToEosMolesResponseModel.model_validate(payload)
 
     async def run_moles_to_volume(
         self,

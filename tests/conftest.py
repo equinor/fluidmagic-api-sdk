@@ -52,22 +52,16 @@ def sync_client(smoke_settings: SmokeSettings):
 
 
 @pytest.fixture
-def async_client(smoke_settings: SmokeSettings):
-    client_cm = AsyncClient.using_client_credentials(
-        smoke_settings.client_id,
-        smoke_settings.client_secret,
-        environment=smoke_settings.environment,
-    )
-    client = asyncio.run(client_cm.__aenter__())
-    try:
-        yield client
-    finally:
-        asyncio.run(client_cm.__aexit__(None, None, None))
+def run_with_async_client(smoke_settings: SmokeSettings):
+    def _run(async_call):
+        async def _runner():
+            async with AsyncClient.using_client_credentials(
+                smoke_settings.client_id,
+                smoke_settings.client_secret,
+                environment=smoke_settings.environment,
+            ) as client:
+                return await async_call(client)
 
-
-@pytest.fixture
-def run_async():
-    def _run(awaitable):
-        return asyncio.run(awaitable)
+        return asyncio.run(_runner())
 
     return _run
