@@ -1,6 +1,6 @@
 import json
 
-from examples.inline_data import (
+from examples.data.conversion_data import (
     characterization_input,
     eos_data,
     fluid,
@@ -19,7 +19,7 @@ client_secret = "CLIENT_SECRET"  # Replace with the client_secret of your applic
 # ---- Running Inline Conversions ----
 # This example demonstrates how to run conversions inline without requiring pre-uploaded resources.
 # This is useful for quick conversions or testing that don't need to be saved or shared.
-# (All data definitions are imported from inline_data.py)
+# (All data definitions are imported from data/conversion_data.py)
 
 # Run inline conversions
 with Client.using_client_credentials(client_id, client_secret, environment="dev") as client:

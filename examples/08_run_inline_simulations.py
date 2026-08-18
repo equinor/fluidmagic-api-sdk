@@ -1,6 +1,6 @@
 import json
 
-from examples.data.data import (
+from examples.data.simulations_data import (
     cme_measured,
     cme_pressures,
     cme_temperature,
