@@ -28,8 +28,8 @@ client_id = "CLIENT_ID"  # Replace with the client_id of your application
 client_secret = "CLIENT_SECRET"  # Replace with the client_secret of your application
 
 # ---- Running Inline Simulations ----
-# This example demonstrates running simulations inline without having to upload resources and create configurations.
-# This is useful for quick simulations or testing that don't need to be saved or shared.
+# This example demonstrates running simulations.
+# All data definitions are imported from data/simulations_data.py
 
 # Run Inline Flash Simulation
 print("=== Running Inline Flash Simulation ===")

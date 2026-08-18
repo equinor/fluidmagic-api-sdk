@@ -17,8 +17,7 @@ client_secret = "CLIENT_SECRET"  # Replace with the client_secret of your applic
 
 
 # ---- Running Inline Conversions ----
-# This example demonstrates how to run conversions inline without requiring pre-uploaded resources.
-# This is useful for quick conversions or testing that don't need to be saved or shared.
+# This example demonstrates how to run conversions.
 # (All data definitions are imported from data/conversion_data.py)
 
 # Run inline conversions
