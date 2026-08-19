@@ -1,7 +1,7 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from fluidmagic_api_sdk.models.data_models.eos_data import EOSData
-from fluidmagic_api_sdk.models.eos_models import DefaultEOSCreateModel
+from fluidmagic_api_sdk.models.eos_models import DefaultEOSCreateModel, EOSTuneModel, EOSTuneResultModel
 
 if TYPE_CHECKING:
     from ...client.async_client import AsyncClient
@@ -34,12 +34,20 @@ class EOSDevelopmentManager:
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
         return EOSData.model_validate(payload)
 
-    def tune_eos(self, payload: dict[str, Any]) -> dict[str, Any]:
+    def tune_eos(self, input_data: EOSTuneModel) -> EOSTuneResultModel:
         """Tune an EOS model.
 
-        Planned endpoint: POST /eos/tune
+        Endpoint: POST /eos/tune
         """
-        raise NotImplementedError("tune_eos is not implemented yet.")
+        response = self._client._request(
+            {
+                "method": "POST",
+                "path": "/eos/tune",
+                "body": input_data.model_dump(),
+            }
+        )
+        payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
+        return EOSTuneResultModel.model_validate(payload)
 
 
 class AsyncEOSDevelopmentManager:
@@ -68,9 +76,17 @@ class AsyncEOSDevelopmentManager:
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
         return EOSData.model_validate(payload)
 
-    async def tune_eos(self, payload: dict[str, Any]) -> dict[str, Any]:
+    async def tune_eos(self, input_data: EOSTuneModel) -> EOSTuneResultModel:
         """Tune an EOS model asynchronously.
 
-        Planned endpoint: POST /eos/tune
+        Endpoint: POST /eos/tune
         """
-        raise NotImplementedError("tune_eos is not implemented yet.")
+        response = await self._client._request(
+            {
+                "method": "POST",
+                "path": "/eos/tune",
+                "body": input_data.model_dump(),
+            }
+        )
+        payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
+        return EOSTuneResultModel.model_validate(payload)

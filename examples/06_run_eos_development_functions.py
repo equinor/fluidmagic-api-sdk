@@ -1,7 +1,7 @@
 import asyncio
 import json
 
-from examples.data.eos_development_data import default_eos_input
+from examples.data.eos_development_data import default_eos_input, tune_eos_input
 from fluidmagic_api_sdk.client.async_client import AsyncClient
 from fluidmagic_api_sdk.client.sync_client import Client
 
@@ -9,8 +9,8 @@ client_id = "CLIENT_ID"  # Replace with the client_id of your application
 client_secret = "CLIENT_SECRET"  # Replace with the client_secret of your application
 
 
-# ---- Running EOS Development Endpoint ----
-# This example demonstrates generating a default EOS model inline.
+# ---- Running EOS Development Endpoints ----
+# This example demonstrates generating a default EOS model and tuning an EOS model inline.
 
 
 # Sync example
@@ -19,6 +19,10 @@ with Client.using_client_credentials(client_id, client_secret, environment="dev"
     print("Generated default EOS (sync):")
     print(json.dumps(eos_data.model_dump(), indent=2))
 
+    tune_result = client.eos.tune_eos(tune_eos_input)
+    print("Tuned EOS Result (sync):")
+    print(json.dumps(tune_result.model_dump(), indent=2))
+
 
 # Async example
 async def run_async_example() -> None:
@@ -26,6 +30,10 @@ async def run_async_example() -> None:
         eos_data = await client.eos.generate_default_eos(default_eos_input)
         print("Generated default EOS (async):")
         print(json.dumps(eos_data.model_dump(), indent=2))
+
+        tune_result = await client.eos.tune_eos(tune_eos_input)
+        print("Tuned EOS Result (async):")
+        print(json.dumps(tune_result.model_dump(), indent=2))
 
 
 if __name__ == "__main__":
