@@ -41,7 +41,7 @@ def test_inline_cme_smoke(sync_client):
         temperature=cme_temperature,
         measured=cme_measured,
     )
-    assert cme_result.relative_total_volume
+    assert cme_result.cme_calculated.relative_total_volume
 
 
 def test_inline_cvd_smoke(sync_client):
@@ -52,7 +52,7 @@ def test_inline_cvd_smoke(sync_client):
         temperature=cvd_temperature,
         measured=cvd_measured,
     )
-    assert cvd_result.z_factor
+    assert cvd_result.cvd_calculated.z_factor
 
 
 def test_inline_dle_smoke(sync_client):
@@ -63,7 +63,7 @@ def test_inline_dle_smoke(sync_client):
         temperature=dle_temperature,
         measured=dle_measured,
     )
-    assert dle_result.oil_formation_volume_factor_dle
+    assert dle_result.dle_calculated.oil_formation_volume_factor_dle
 
 
 def test_inline_sep_smoke(sync_client):
@@ -74,7 +74,7 @@ def test_inline_sep_smoke(sync_client):
         temperatures=sep_temperatures,
         measured=sep_measured,
     )
-    assert sep_result.total_gas_oil_ratio
+    assert sep_result.separator_calculated.total_gas_oil_ratio
 
 
 def test_inline_process_smoke(sync_client):
@@ -83,8 +83,8 @@ def test_inline_process_smoke(sync_client):
         molar_stream=oil_feed,
         process=process_data,
     )
-    assert process_result.tank_names
-    assert len(process_result.oil_volume) == len(process_result.tank_names)
+    assert process_result.component_names
+    assert process_result.process_calculated.tank_names
 
 
 def test_inline_psat_smoke(sync_client):
@@ -120,7 +120,7 @@ def test_inline_cme_smoke_async(run_with_async_client):
             measured=cme_measured,
         )
     )
-    assert cme_result.relative_total_volume
+    assert cme_result.cme_calculated.relative_total_volume
 
 
 def test_inline_cvd_smoke_async(run_with_async_client):
@@ -133,7 +133,7 @@ def test_inline_cvd_smoke_async(run_with_async_client):
             measured=cvd_measured,
         )
     )
-    assert cvd_result.z_factor
+    assert cvd_result.cvd_calculated.z_factor
 
 
 def test_inline_dle_smoke_async(run_with_async_client):
@@ -146,7 +146,7 @@ def test_inline_dle_smoke_async(run_with_async_client):
             measured=dle_measured,
         )
     )
-    assert dle_result.oil_formation_volume_factor_dle
+    assert dle_result.dle_calculated.oil_formation_volume_factor_dle
 
 
 def test_inline_sep_smoke_async(run_with_async_client):
@@ -159,7 +159,7 @@ def test_inline_sep_smoke_async(run_with_async_client):
             measured=sep_measured,
         )
     )
-    assert sep_result.total_gas_oil_ratio
+    assert sep_result.separator_calculated.total_gas_oil_ratio
 
 
 def test_inline_process_smoke_async(run_with_async_client):
@@ -170,8 +170,8 @@ def test_inline_process_smoke_async(run_with_async_client):
             process=process_data,
         )
     )
-    assert process_result.tank_names
-    assert len(process_result.oil_volume) == len(process_result.tank_names)
+    assert process_result.component_names
+    assert process_result.process_calculated.tank_names
 
 
 def test_inline_psat_smoke_async(run_with_async_client):

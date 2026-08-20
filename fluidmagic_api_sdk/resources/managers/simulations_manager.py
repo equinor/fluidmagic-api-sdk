@@ -1,25 +1,22 @@
 from typing import TYPE_CHECKING
 
-from fluidmagic_api_sdk.models.data_models.calculated import (
-    CMECalculated,
-    CVDCalculated,
-    DLECalculated,
-    SeparatorCalculated,
-)
 from fluidmagic_api_sdk.models.data_models.eos_data import EOSData
 from fluidmagic_api_sdk.models.data_models.process_data import ProcessData
 from fluidmagic_api_sdk.models.simulate_models import (
     CMEInlineRequestModel,
     CMEMeasuredModel,
     CMESimulationRequestModel,
+    CMESimulationResponseModel,
     CMEWeightsModel,
     CVDInlineRequestModel,
     CVDMeasuredModel,
     CVDSimulationRequestModel,
+    CVDSimulationResponseModel,
     CVDWeightsModel,
     DLEInlineRequestModel,
     DLEMeasuredModel,
     DLESimulationRequestModel,
+    DLESimulationResponseModel,
     DLEWeightsModel,
     FlashInlineRequestModel,
     FlashMeasuredModel,
@@ -37,6 +34,7 @@ from fluidmagic_api_sdk.models.simulate_models import (
     SEPInlineRequestModel,
     SEPMeasuredModel,
     SEPSimulationRequestModel,
+    SEPSimulationResponseModel,
     SEPWeightsModel,
 )
 
@@ -99,7 +97,7 @@ class SimulationsManager:
         temperature: float,
         measured: CMEMeasuredModel | None = None,
         weights: CMEWeightsModel | None = None,
-    ) -> CMECalculated:
+    ) -> CMESimulationResponseModel:
         """Run a CME (Constant Molar Expansion) simulation.
 
         Args:
@@ -111,7 +109,7 @@ class SimulationsManager:
             weights: Optional regression weights per measured CME property.
 
         Returns:
-            The CME simulation results as CMECalculated.
+            The CME simulation results as CMESimulationResponseModel.
         """
         request = CMEInlineRequestModel(
             eos_data=eos,
@@ -131,9 +129,7 @@ class SimulationsManager:
             }
         )
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
-        if "cme_calculated" in payload:
-            return CMECalculated.model_validate(payload["cme_calculated"])
-        return CMECalculated.model_validate(payload)
+        return CMESimulationResponseModel.model_validate(payload)
 
     def run_cvd(
         self,
@@ -143,7 +139,7 @@ class SimulationsManager:
         temperature: float,
         measured: CVDMeasuredModel | None = None,
         weights: CVDWeightsModel | None = None,
-    ) -> CVDCalculated:
+    ) -> CVDSimulationResponseModel:
         """Run a CVD (Constant Volume Depletion) simulation.
 
         Args:
@@ -155,7 +151,7 @@ class SimulationsManager:
             weights: Optional regression weights per measured CVD property.
 
         Returns:
-            The CVD simulation results as CVDCalculated.
+            The CVD simulation results as CVDSimulationResponseModel.
         """
         request = CVDInlineRequestModel(
             eos_data=eos,
@@ -175,9 +171,7 @@ class SimulationsManager:
             }
         )
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
-        if "cvd_calculated" in payload:
-            return CVDCalculated.model_validate(payload["cvd_calculated"])
-        return CVDCalculated.model_validate(payload)
+        return CVDSimulationResponseModel.model_validate(payload)
 
     def run_dle(
         self,
@@ -187,7 +181,7 @@ class SimulationsManager:
         temperature: float,
         measured: DLEMeasuredModel | None = None,
         weights: DLEWeightsModel | None = None,
-    ) -> DLECalculated:
+    ) -> DLESimulationResponseModel:
         """Run a DLE (Differential Liberation) simulation.
 
         Args:
@@ -199,7 +193,7 @@ class SimulationsManager:
             weights: Optional regression weights per measured DLE property.
 
         Returns:
-            The DLE simulation results as DLECalculated.
+            The DLE simulation results as DLESimulationResponseModel.
         """
         request = DLEInlineRequestModel(
             eos_data=eos,
@@ -219,9 +213,7 @@ class SimulationsManager:
             }
         )
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
-        if "dle_calculated" in payload:
-            return DLECalculated.model_validate(payload["dle_calculated"])
-        return DLECalculated.model_validate(payload)
+        return DLESimulationResponseModel.model_validate(payload)
 
     def run_sep(
         self,
@@ -231,7 +223,7 @@ class SimulationsManager:
         temperatures: list[float],
         measured: SEPMeasuredModel | None = None,
         weights: SEPWeightsModel | None = None,
-    ) -> SeparatorCalculated:
+    ) -> SEPSimulationResponseModel:
         """Run a separator (SEP) simulation.
 
         Args:
@@ -243,7 +235,7 @@ class SimulationsManager:
             weights: Optional regression weights per measured SEP property.
 
         Returns:
-            The SEP simulation results as SeparatorCalculated.
+            The SEP simulation results as SEPSimulationResponseModel.
         """
         request = SEPInlineRequestModel(
             eos_data=eos,
@@ -263,11 +255,7 @@ class SimulationsManager:
             }
         )
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
-        if "sep_calculated" in payload:
-            return SeparatorCalculated.model_validate(payload["sep_calculated"])
-        if "separator_calculated" in payload:
-            return SeparatorCalculated.model_validate(payload["separator_calculated"])
-        return SeparatorCalculated.model_validate(payload)
+        return SEPSimulationResponseModel.model_validate(payload)
 
     def run_psat(
         self,
@@ -398,7 +386,7 @@ class AsyncSimulationsManager:
         temperature: float,
         measured: CMEMeasuredModel | None = None,
         weights: CMEWeightsModel | None = None,
-    ) -> CMECalculated:
+    ) -> CMESimulationResponseModel:
         """Run a CME (Constant Molar Expansion) simulation asynchronously.
 
         Args:
@@ -410,7 +398,7 @@ class AsyncSimulationsManager:
             weights: Optional regression weights per measured CME property.
 
         Returns:
-            The CME simulation results as CMECalculated.
+            The CME simulation results as CMESimulationResponseModel.
         """
         request = CMEInlineRequestModel(
             eos_data=eos,
@@ -430,9 +418,7 @@ class AsyncSimulationsManager:
             }
         )
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
-        if "cme_calculated" in payload:
-            return CMECalculated.model_validate(payload["cme_calculated"])
-        return CMECalculated.model_validate(payload)
+        return CMESimulationResponseModel.model_validate(payload)
 
     async def run_cvd(
         self,
@@ -442,7 +428,7 @@ class AsyncSimulationsManager:
         temperature: float,
         measured: CVDMeasuredModel | None = None,
         weights: CVDWeightsModel | None = None,
-    ) -> CVDCalculated:
+    ) -> CVDSimulationResponseModel:
         """Run a CVD (Constant Volume Depletion) simulation asynchronously.
 
         Args:
@@ -454,7 +440,7 @@ class AsyncSimulationsManager:
             weights: Optional regression weights per measured CVD property.
 
         Returns:
-            The CVD simulation results as CVDCalculated.
+            The CVD simulation results as CVDSimulationResponseModel.
         """
         request = CVDInlineRequestModel(
             eos_data=eos,
@@ -474,9 +460,7 @@ class AsyncSimulationsManager:
             }
         )
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
-        if "cvd_calculated" in payload:
-            return CVDCalculated.model_validate(payload["cvd_calculated"])
-        return CVDCalculated.model_validate(payload)
+        return CVDSimulationResponseModel.model_validate(payload)
 
     async def run_dle(
         self,
@@ -486,7 +470,7 @@ class AsyncSimulationsManager:
         temperature: float,
         measured: DLEMeasuredModel | None = None,
         weights: DLEWeightsModel | None = None,
-    ) -> DLECalculated:
+    ) -> DLESimulationResponseModel:
         """Run a DLE (Differential Liberation) simulation asynchronously.
 
         Args:
@@ -498,7 +482,7 @@ class AsyncSimulationsManager:
             weights: Optional regression weights per measured DLE property.
 
         Returns:
-            The DLE simulation results as DLECalculated.
+            The DLE simulation results as DLESimulationResponseModel.
         """
         request = DLEInlineRequestModel(
             eos_data=eos,
@@ -518,9 +502,7 @@ class AsyncSimulationsManager:
             }
         )
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
-        if "dle_calculated" in payload:
-            return DLECalculated.model_validate(payload["dle_calculated"])
-        return DLECalculated.model_validate(payload)
+        return DLESimulationResponseModel.model_validate(payload)
 
     async def run_sep(
         self,
@@ -530,7 +512,7 @@ class AsyncSimulationsManager:
         temperatures: list[float],
         measured: SEPMeasuredModel | None = None,
         weights: SEPWeightsModel | None = None,
-    ) -> SeparatorCalculated:
+    ) -> SEPSimulationResponseModel:
         """Run a separator (SEP) simulation asynchronously.
 
         Args:
@@ -542,7 +524,7 @@ class AsyncSimulationsManager:
             weights: Optional regression weights per measured SEP property.
 
         Returns:
-            The SEP simulation results as SeparatorCalculated.
+            The SEP simulation results as SEPSimulationResponseModel.
         """
         request = SEPInlineRequestModel(
             eos_data=eos,
@@ -562,11 +544,7 @@ class AsyncSimulationsManager:
             }
         )
         payload = self._client._handle_response(response.status_code, response.text, self._client._maybe_json(response))
-        if "sep_calculated" in payload:
-            return SeparatorCalculated.model_validate(payload["sep_calculated"])
-        if "separator_calculated" in payload:
-            return SeparatorCalculated.model_validate(payload["separator_calculated"])
-        return SeparatorCalculated.model_validate(payload)
+        return SEPSimulationResponseModel.model_validate(payload)
 
     async def run_psat(
         self,

@@ -5,7 +5,6 @@ from typing import Annotated, ClassVar
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, model_validator
 
 from fluidmagic_api_sdk.models.constants.headers import PVTHeaders
-from fluidmagic_api_sdk.models.data_models.calculated import FlashCalculated, SaturationPressureCalculated
 from fluidmagic_api_sdk.models.data_models.eos_data import EOSData
 from fluidmagic_api_sdk.models.data_models.process_data import ProcessData
 from fluidmagic_api_sdk.models.data_models.pvt_data import PVTData
@@ -198,17 +197,92 @@ class FlashSimulationRequestModel(_BaseSimulationRequestModel):
         return self.temperatures
 
 
+class FlashCalculatedResponse(BaseModel):
+    """Per-stage Flash calculated series, with `pressures` and `temperatures` prepended.
+
+    Mirrors the fluidmagic-core `FlashCalculated` fields (gas_mole_fraction,
+    equilibrium_gas_comp, equilibrium_oil_comp, oil_density, gas_density,
+    gas_oil_ratio, oil_volume, gas_volume, oil_molecular_weight,
+    gas_molecular_weight, oil_viscosity, gas_viscosity, interfacial_tension)
+    but adds the `pressures` and `temperatures` lists so each series can be
+    indexed by stage without cross-referencing the request. Unlike CME / CVD /
+    DLE, Flash is not isothermal, so `temperatures` is a per-stage list.
+    Missing values are serialised as `null`.
+
+    This matches the layout fluidmagic produces when a `.magic` case writes
+    the results as DataFrames — the pressure and temperature columns are
+    prepended to the calculated series (see
+    `BasePVTExperiment.get_results_as_dataframes`).
+    """
+
+    pressures: list[float] = Field(..., description="Pressure stages in bara the Flash simulation was run at.")
+    temperatures: list[float] = Field(..., description="Temperature per stage in °C the Flash simulation was run at.")
+    gas_mole_fraction: list[float | None] = Field(..., description="Gas mole fraction per stage.")
+    equilibrium_gas_comp: list[list[float | None]] = Field(
+        ...,
+        description="Equilibrium gas composition per stage, aligned with `pressures` / `temperatures` and the EOS component order.",
+    )
+    equilibrium_oil_comp: list[list[float | None]] = Field(
+        ...,
+        description="Equilibrium oil composition per stage, aligned with `pressures` / `temperatures` and the EOS component order.",
+    )
+    oil_density: list[float | None] = Field(..., description="Oil density per stage (kg/m³).")
+    gas_density: list[float | None] = Field(..., description="Gas density per stage (kg/m³).")
+    gas_oil_ratio: list[float | None] = Field(..., description="Gas-to-oil ratio per stage (m³/sm³).")
+    oil_volume: list[float | None] = Field(..., description="Oil molar volume per stage.")
+    gas_volume: list[float | None] = Field(..., description="Gas molar volume per stage.")
+    oil_molecular_weight: list[float | None] = Field(..., description="Oil molecular weight per stage.")
+    gas_molecular_weight: list[float | None] = Field(..., description="Gas molecular weight per stage.")
+    oil_viscosity: list[float | None] = Field(..., description="Oil viscosity per stage (cP).")
+    gas_viscosity: list[float | None] = Field(..., description="Gas viscosity per stage (cP).")
+    interfacial_tension: list[float | None] = Field(..., description="Gas-oil interfacial tension per stage.")
+
+
 class FlashSimulationResponseModel(BaseModel):
     """Response wrapper for the flash simulation endpoint.
 
-    `sum_of_squares` is the weighted regression objective computed by
-    `FlashExperiment.calculate_sum_of_squares` using the request's `measured`
-    and `weights`. It is `0.0` when no weights (or only zero weights) were
-    supplied, so callers tuning the EOS can vary `weights` and observe the
-    SSQ react.
+    Carries the full data set that fluidmagic's `FlashExperiment.print_results`
+    dumps to the console when running a `.magic` case with `print: true`:
+
+    - `eos_model_name`, `component_names` and `input_composition` identify the
+      fluid the experiment was run on.
+    - `flash_calculated` holds the per-stage calculated properties, the
+      equilibrium gas / oil compositions, and the `pressures` / `temperatures`
+      columns so each series is self-indexed by stage. Unlike CME / CVD / DLE,
+      Flash is not isothermal — the temperature varies per stage and lives
+      inside `flash_calculated` alongside the pressures rather than at the
+      response top level.
+    - `measured` echoes the per-stage measurements after `"null"` / `"*"`
+      sentinel coercion, keyed by the API field name and with `None` for
+      missing values, so callers can render them side-by-side with the
+      calculated ones exactly the way the terminal print does.
+    - `sum_of_squares` is the weighted regression objective computed by
+      `FlashExperiment.calculate_sum_of_squares` using the request's `measured`
+      and `weights`. It is `0.0` when no weights (or only zero weights) were
+      supplied.
     """
 
-    flash_calculated: FlashCalculated = Field(..., description="Flash phase / property results per stage.")
+    eos_model_name: str = Field(..., description="Name of the EOS model used for the simulation.")
+    component_names: list[str] = Field(
+        ...,
+        description="EOS component names, in the same order as `input_composition` and the composition axes of `flash_calculated`.",
+    )
+    input_composition: list[float] = Field(
+        ...,
+        description="Input molar composition (before normalisation), aligned with `component_names`.",
+    )
+    measured: FlashMeasuredModel = Field(
+        default_factory=FlashMeasuredModel,
+        description=(
+            "Per-stage measured values echoed back for parity with the terminal `print_results` output. "
+            "Same shape as the request's `measured` object (`gas_oil_ratio`, `oil_density`, `gas_density`); "
+            "missing measurements are returned as `null`."
+        ),
+    )
+    flash_calculated: FlashCalculatedResponse = Field(
+        ...,
+        description="Flash phase / property results per stage, including the `pressures` and `temperatures` columns so each series is self-indexed.",
+    )
     sum_of_squares: float = Field(
         ...,
         ge=0.0,
@@ -371,6 +445,90 @@ class CMESimulationRequestModel(_BaseSimulationRequestModel):
         # CMEExperiment is isothermal but PVTData requires temperatures and
         # pressures to be the same length; broadcast the single value.
         return [self.temperature] * len(self.pressures)
+
+
+class CMECalculatedResponse(BaseModel):
+    """Per-stage CME calculated series, with `pressures` prepended.
+
+    Mirrors the fluidmagic-core `CMECalculated` fields (relative_total_volume,
+    compressibility, y_factor, density, liquid_volume, z_factor,
+    equilibrium_gas_comp, equilibrium_oil_comp) but adds the `pressures` list
+    so each series can be indexed by pressure stage without cross-referencing
+    the request. Missing values are serialised as `null`.
+
+    This matches the layout fluidmagic produces when a `.magic` case writes
+    the results as DataFrames — the pressure column is prepended to the
+    calculated series (see `BasePVTExperiment.get_results_as_dataframes`).
+    """
+
+    pressures: list[float] = Field(..., description="Pressure stages in bara the CME simulation was run at.")
+    relative_total_volume: list[float | None] = Field(..., description="Relative total volume per stage.")
+    compressibility: list[float | None] = Field(..., description="Compressibility per stage.")
+    y_factor: list[float | None] = Field(..., description="Y-factor per stage.")
+    density: list[float | None] = Field(..., description="Density per stage (kg/m³).")
+    liquid_volume: list[float | None] = Field(..., description="Relative liquid volume per stage (%).")
+    z_factor: list[float | None] = Field(..., description="Z-factor per stage.")
+    equilibrium_gas_comp: list[list[float | None]] = Field(
+        ...,
+        description="Equilibrium gas composition per stage, aligned with `pressures` and the EOS component order.",
+    )
+    equilibrium_oil_comp: list[list[float | None]] = Field(
+        ...,
+        description="Equilibrium oil composition per stage, aligned with `pressures` and the EOS component order.",
+    )
+
+
+class CMESimulationResponseModel(BaseModel):
+    """Response wrapper for the CME simulation endpoint.
+
+    Carries the full data set that fluidmagic's `CMEExperiment.print_results`
+    dumps to the console when running a `.magic` case with `print: true`:
+
+    - `eos_model_name`, `temperature`, `component_names` and `input_composition`
+      identify the fluid and conditions the experiment was run at.
+    - `cme_calculated` holds the per-stage calculated properties, the
+      equilibrium gas / oil compositions and the `pressures` column so each
+      series is self-indexed by pressure stage.
+    - `measured` echoes the per-stage measurements after `"null"` / `"*"`
+      sentinel coercion, keyed by the API field name and with `None` for
+      missing values, so callers can render them side-by-side with the
+      calculated ones exactly the way the terminal print does.
+    - `sum_of_squares` is the weighted regression objective computed by
+      `CMEExperiment.calculate_sum_of_squares` using the request's `measured`
+      and `weights`. It is `0.0` when no weights (or only zero weights) were
+      supplied.
+    """
+
+    eos_model_name: str = Field(..., description="Name of the EOS model used for the simulation.")
+    temperature: float = Field(..., description="Isothermal temperature in °C the CME simulation was run at.")
+    component_names: list[str] = Field(
+        ...,
+        description="EOS component names, in the same order as `input_composition` and the composition axes of `cme_calculated`.",
+    )
+    input_composition: list[float] = Field(
+        ...,
+        description="Input molar composition (before normalisation), aligned with `component_names`.",
+    )
+    measured: CMEMeasuredModel = Field(
+        default_factory=CMEMeasuredModel,
+        description=(
+            "Per-stage measured values echoed back for parity with the terminal `print_results` output. "
+            "Same shape as the request's `measured` object (`relative_total_volume`, `compressibility`, "
+            "`y_factor`, `density`, `liquid_volume`, `z_factor`); missing measurements are returned as `null`."
+        ),
+    )
+    cme_calculated: CMECalculatedResponse = Field(
+        ...,
+        description="CME per-stage results, including the `pressures` column so each series is self-indexed.",
+    )
+    sum_of_squares: float = Field(
+        ...,
+        ge=0.0,
+        description=(
+            "Weighted sum-of-squares between the supplied `measured` values and the "
+            "calculated values. Returns 0.0 when no `weights` were provided."
+        ),
+    )
 
 
 class CVDMeasuredModel(BaseModel):
@@ -544,6 +702,97 @@ class CVDSimulationRequestModel(_BaseSimulationRequestModel):
         # CVDExperiment is isothermal but PVTData requires temperatures and
         # pressures to be the same length; broadcast the single value.
         return [self.temperature] * len(self.pressures)
+
+
+class CVDCalculatedResponse(BaseModel):
+    """Per-stage CVD calculated series, with `pressures` prepended.
+
+    Mirrors the fluidmagic-core `CVDCalculated` fields (liquid_volume,
+    moles_gas_produced, z_factor, two_phase_z_factor,
+    oil_formation_volume_factor, solution_gas_oil_ratio,
+    gas_formation_volume_factor, oil_density, gas_specific_gravity,
+    equilibrium_gas_comp, equilibrium_oil_comp) but adds the `pressures`
+    list so each series can be indexed by pressure stage without
+    cross-referencing the request. Missing values are serialised as `null`.
+
+    This matches the layout fluidmagic produces when a `.magic` case writes
+    the results as DataFrames — the pressure column is prepended to the
+    calculated series (see `BasePVTExperiment.get_results_as_dataframes`).
+    """
+
+    pressures: list[float] = Field(..., description="Pressure stages in bara the CVD simulation was run at.")
+    liquid_volume: list[float | None] = Field(..., description="Relative liquid volume per stage (%).")
+    moles_gas_produced: list[float | None] = Field(..., description="Cumulative moles of gas produced per stage (%).")
+    z_factor: list[float | None] = Field(..., description="Gas Z-factor per stage.")
+    two_phase_z_factor: list[float | None] = Field(..., description="Two-phase Z-factor per stage.")
+    oil_formation_volume_factor: list[float | None] = Field(..., description="Oil formation volume factor per stage.")
+    solution_gas_oil_ratio: list[float | None] = Field(..., description="Solution gas-to-oil ratio per stage.")
+    gas_formation_volume_factor: list[float | None] = Field(..., description="Gas formation volume factor per stage.")
+    oil_density: list[float | None] = Field(..., description="Oil density per stage (kg/m³).")
+    gas_specific_gravity: list[float | None] = Field(..., description="Gas specific gravity per stage.")
+    equilibrium_gas_comp: list[list[float | None]] = Field(
+        ...,
+        description="Equilibrium gas composition per stage, aligned with `pressures` and the EOS component order.",
+    )
+    equilibrium_oil_comp: list[list[float | None]] = Field(
+        ...,
+        description="Equilibrium oil composition per stage, aligned with `pressures` and the EOS component order.",
+    )
+
+
+class CVDSimulationResponseModel(BaseModel):
+    """Response wrapper for the CVD simulation endpoint.
+
+    Carries the full data set that fluidmagic's `CVDExperiment.print_results`
+    dumps to the console when running a `.magic` case with `print: true`:
+
+    - `eos_model_name`, `temperature`, `component_names` and `input_composition`
+      identify the fluid and conditions the experiment was run at.
+    - `cvd_calculated` holds the per-stage calculated properties, the
+      equilibrium gas / oil compositions and the `pressures` column so each
+      series is self-indexed by pressure stage.
+    - `measured` echoes the per-stage measurements after `"null"` / `"*"`
+      sentinel coercion, keyed by the API field name and with `None` for
+      missing values, so callers can render them side-by-side with the
+      calculated ones exactly the way the terminal print does.
+    - `sum_of_squares` is the weighted regression objective computed by
+      `CVDExperiment.calculate_sum_of_squares` using the request's `measured`
+      and `weights`. It is `0.0` when no weights (or only zero weights) were
+      supplied.
+    """
+
+    eos_model_name: str = Field(..., description="Name of the EOS model used for the simulation.")
+    temperature: float = Field(..., description="Isothermal temperature in °C the CVD simulation was run at.")
+    component_names: list[str] = Field(
+        ...,
+        description="EOS component names, in the same order as `input_composition` and the composition axes of `cvd_calculated`.",
+    )
+    input_composition: list[float] = Field(
+        ...,
+        description="Input molar composition (before normalisation), aligned with `component_names`.",
+    )
+    measured: CVDMeasuredModel = Field(
+        default_factory=CVDMeasuredModel,
+        description=(
+            "Per-stage measured values echoed back for parity with the terminal `print_results` output. "
+            "Same shape as the request's `measured` object (`liquid_volume`, `moles_gas_produced`, "
+            "`z_factor`, `two_phase_z_factor`, `oil_formation_volume_factor`, `solution_gas_oil_ratio`, "
+            "`gas_formation_volume_factor`, `oil_density`, `gas_specific_gravity`); missing measurements "
+            "are returned as `null`."
+        ),
+    )
+    cvd_calculated: CVDCalculatedResponse = Field(
+        ...,
+        description="CVD per-stage results, including the `pressures` column so each series is self-indexed.",
+    )
+    sum_of_squares: float = Field(
+        ...,
+        ge=0.0,
+        description=(
+            "Weighted sum-of-squares between the supplied `measured` values and the "
+            "calculated values. Returns 0.0 when no `weights` were provided."
+        ),
+    )
 
 
 class CVDInlineRequestModel(BaseModel):
@@ -758,6 +1007,98 @@ class DLESimulationRequestModel(_BaseSimulationRequestModel):
         return [self.temperature] * len(self.pressures)
 
 
+class DLECalculatedResponse(BaseModel):
+    """Per-stage DLE calculated series, with `pressures` prepended.
+
+    Mirrors the fluidmagic-core `DLECalculated` fields
+    (oil_formation_volume_factor_dle, solution_gas_oil_ratio_dle,
+    gas_formation_volume_factor, oil_density, z_factor,
+    gas_specific_gravity, oil_viscosity, equilibrium_gas_comp,
+    equilibrium_oil_comp) but adds the `pressures` list so each series can
+    be indexed by pressure stage without cross-referencing the request.
+    Missing values are serialised as `null`.
+
+    This matches the layout fluidmagic produces when a `.magic` case writes
+    the results as DataFrames — the pressure column is prepended to the
+    calculated series (see `BasePVTExperiment.get_results_as_dataframes`).
+    """
+
+    pressures: list[float] = Field(..., description="Pressure stages in bara the DLE simulation was run at.")
+    oil_formation_volume_factor_dle: list[float | None] = Field(
+        ..., description="Oil formation volume factor (DLE) per stage."
+    )
+    solution_gas_oil_ratio_dle: list[float | None] = Field(
+        ..., description="Solution gas-to-oil ratio (DLE) per stage."
+    )
+    gas_formation_volume_factor: list[float | None] = Field(..., description="Gas formation volume factor per stage.")
+    oil_density: list[float | None] = Field(..., description="Oil density per stage (kg/m³).")
+    z_factor: list[float | None] = Field(..., description="Gas Z-factor per stage.")
+    gas_specific_gravity: list[float | None] = Field(..., description="Gas specific gravity per stage.")
+    oil_viscosity: list[float | None] = Field(..., description="Oil viscosity per stage (cP).")
+    equilibrium_gas_comp: list[list[float | None]] = Field(
+        ...,
+        description="Equilibrium gas composition per stage, aligned with `pressures` and the EOS component order.",
+    )
+    equilibrium_oil_comp: list[list[float | None]] = Field(
+        ...,
+        description="Equilibrium oil composition per stage, aligned with `pressures` and the EOS component order.",
+    )
+
+
+class DLESimulationResponseModel(BaseModel):
+    """Response wrapper for the DLE simulation endpoint.
+
+    Carries the full data set that fluidmagic's `DLEExperiment.print_results`
+    dumps to the console when running a `.magic` case with `print: true`:
+
+    - `eos_model_name`, `temperature`, `component_names` and `input_composition`
+      identify the fluid and conditions the experiment was run at.
+    - `dle_calculated` holds the per-stage calculated properties, the
+      equilibrium gas / oil compositions and the `pressures` column so each
+      series is self-indexed by pressure stage.
+    - `measured` echoes the per-stage measurements after `"null"` / `"*"`
+      sentinel coercion, keyed by the API field name and with `None` for
+      missing values, so callers can render them side-by-side with the
+      calculated ones exactly the way the terminal print does.
+    - `sum_of_squares` is the weighted regression objective computed by
+      `DLEExperiment.calculate_sum_of_squares` using the request's `measured`
+      and `weights`. It is `0.0` when no weights (or only zero weights) were
+      supplied.
+    """
+
+    eos_model_name: str = Field(..., description="Name of the EOS model used for the simulation.")
+    temperature: float = Field(..., description="Isothermal temperature in °C the DLE simulation was run at.")
+    component_names: list[str] = Field(
+        ...,
+        description="EOS component names, in the same order as `input_composition` and the composition axes of `dle_calculated`.",
+    )
+    input_composition: list[float] = Field(
+        ...,
+        description="Input molar composition (before normalisation), aligned with `component_names`.",
+    )
+    measured: DLEMeasuredModel = Field(
+        default_factory=DLEMeasuredModel,
+        description=(
+            "Per-stage measured values echoed back for parity with the terminal `print_results` output. "
+            "Same shape as the request's `measured` object (`oil_formation_volume_factor_dle`, "
+            "`solution_gas_oil_ratio_dle`, `gas_formation_volume_factor`, `oil_density`, `z_factor`, "
+            "`gas_specific_gravity`, `oil_viscosity`); missing measurements are returned as `null`."
+        ),
+    )
+    dle_calculated: DLECalculatedResponse = Field(
+        ...,
+        description="DLE per-stage results, including the `pressures` column so each series is self-indexed.",
+    )
+    sum_of_squares: float = Field(
+        ...,
+        ge=0.0,
+        description=(
+            "Weighted sum-of-squares between the supplied `measured` values and the "
+            "calculated values. Returns 0.0 when no `weights` were provided."
+        ),
+    )
+
+
 class DLEInlineRequestModel(BaseModel):
     """Request body for the inline DLE endpoint.
 
@@ -897,6 +1238,98 @@ class SEPSimulationRequestModel(_BaseSimulationRequestModel):
         return self.temperatures
 
 
+class SEPCalculatedResponse(BaseModel):
+    """Per-stage separator calculated series, with `pressures` and `temperatures` prepended.
+
+    Mirrors the fluidmagic-core `SeparatorCalculated` fields (gas_oil_ratio,
+    total_gas_oil_ratio, gas_specific_gravity, oil_density,
+    oil_formation_volume_factor, equilibrium_gas_comp, equilibrium_oil_comp)
+    but adds the `pressures` and `temperatures` lists so each series can be
+    indexed by stage without cross-referencing the request. Like Flash and
+    unlike CME / CVD / DLE, SEP is not isothermal, so `temperatures` is a
+    per-stage list. Missing values are serialised as `null`.
+
+    This matches the layout fluidmagic produces when a `.magic` case writes
+    the results as DataFrames — the pressure and temperature columns are
+    prepended to the calculated series (see
+    `BasePVTExperiment.get_results_as_dataframes`).
+    """
+
+    pressures: list[float] = Field(..., description="Pressure stages in bara the separator simulation was run at.")
+    temperatures: list[float] = Field(
+        ..., description="Temperature per stage in °C the separator simulation was run at."
+    )
+    gas_oil_ratio: list[float | None] = Field(..., description="Gas-oil ratio per stage (sm³/sm³).")
+    total_gas_oil_ratio: list[float | None] = Field(..., description="Total gas-oil ratio per stage (sm³/sm³).")
+    gas_specific_gravity: list[float | None] = Field(..., description="Gas specific gravity per stage.")
+    oil_density: list[float | None] = Field(..., description="Oil density per stage (kg/m³).")
+    oil_formation_volume_factor: list[float | None] = Field(..., description="Oil formation volume factor per stage.")
+    equilibrium_gas_comp: list[list[float | None]] = Field(
+        ...,
+        description="Equilibrium gas composition per stage, aligned with `pressures` / `temperatures` and the EOS component order.",
+    )
+    equilibrium_oil_comp: list[list[float | None]] = Field(
+        ...,
+        description="Equilibrium oil composition per stage, aligned with `pressures` / `temperatures` and the EOS component order.",
+    )
+
+
+class SEPSimulationResponseModel(BaseModel):
+    """Response wrapper for the separator simulation endpoint.
+
+    Carries the full data set that fluidmagic's `SeperatorExperiment.print_results`
+    dumps to the console when running a `.magic` case with `print: true`:
+
+    - `eos_model_name`, `component_names` and `input_composition` identify the
+      fluid the experiment was run on.
+    - `separator_calculated` holds the per-stage calculated properties, the
+      equilibrium gas / oil compositions, and the `pressures` / `temperatures`
+      columns so each series is self-indexed by stage. Like Flash and unlike
+      CME / CVD / DLE, SEP is not isothermal — the temperature varies per
+      stage and lives inside `separator_calculated` alongside the pressures
+      rather than at the response top level.
+    - `measured` echoes the per-stage measurements after `"null"` / `"*"`
+      sentinel coercion, keyed by the API field name and with `None` for
+      missing values, so callers can render them side-by-side with the
+      calculated ones exactly the way the terminal print does.
+    - `sum_of_squares` is the weighted regression objective computed by
+      `SeperatorExperiment.calculate_sum_of_squares` using the request's
+      `measured` and `weights`. It is `0.0` when no weights (or only zero
+      weights) were supplied.
+    """
+
+    eos_model_name: str = Field(..., description="Name of the EOS model used for the simulation.")
+    component_names: list[str] = Field(
+        ...,
+        description="EOS component names, in the same order as `input_composition` and the composition axes of `separator_calculated`.",
+    )
+    input_composition: list[float] = Field(
+        ...,
+        description="Input molar composition (before normalisation), aligned with `component_names`.",
+    )
+    measured: SEPMeasuredModel = Field(
+        default_factory=SEPMeasuredModel,
+        description=(
+            "Per-stage measured values echoed back for parity with the terminal `print_results` output. "
+            "Same shape as the request's `measured` object (`gas_oil_ratio`, `total_gas_oil_ratio`, "
+            "`gas_specific_gravity`, `oil_density`, `oil_formation_volume_factor`); missing measurements "
+            "are returned as `null`."
+        ),
+    )
+    separator_calculated: SEPCalculatedResponse = Field(
+        ...,
+        description="Separator per-stage results, including the `pressures` and `temperatures` columns so each series is self-indexed.",
+    )
+    sum_of_squares: float = Field(
+        ...,
+        ge=0.0,
+        description=(
+            "Weighted sum-of-squares between the supplied `measured` values and the "
+            "calculated values. Returns 0.0 when no `weights` were provided."
+        ),
+    )
+
+
 class SEPInlineRequestModel(BaseModel):
     """Request body for the inline SEP endpoint.
 
@@ -1003,16 +1436,83 @@ class PsatSimulationRequestModel(BaseModel):
         )
 
 
+class PsatCalculatedResponse(BaseModel):
+    """Saturation-pressure calculated result and incipient equilibrium compositions.
+
+    Unlike the per-stage experiments (CME / CVD / DLE) this is a single-point
+    calculation, so there is no `pressures` column: `saturation_pressure` is a
+    scalar and `equilibrium_gas_comp` / `equilibrium_oil_comp` are flat
+    per-component vectors aligned with the EOS component order.
+
+    Mirrors the fluidmagic-core `SaturationPressureCalculated` shape but
+    flattens `saturation_pressure` from its internal length-1 list to a
+    scalar and exposes `saturation_type` explicitly so callers don't have
+    to derive it from `fluid_type`.
+    """
+
+    saturation_pressure: float | None = Field(
+        ..., description="Calculated saturation pressure in bara at the requested temperature."
+    )
+    saturation_type: str = Field(
+        ...,
+        description="Either `Bubble-point` (for an oil fluid) or `Dew-point` (for a gas fluid).",
+    )
+    fluid_type: str | None = Field(
+        None,
+        description="Fluid phase type (`oil`, `gas`, or `mix`) at the saturation point.",
+    )
+    equilibrium_gas_comp: list[float | None] = Field(
+        ...,
+        description="Incipient equilibrium gas composition, in the EOS component order.",
+    )
+    equilibrium_oil_comp: list[float | None] = Field(
+        ...,
+        description="Incipient equilibrium oil composition, in the EOS component order.",
+    )
+
+
 class PsatSimulationResponseModel(BaseModel):
     """Response wrapper for the saturation-pressure simulation endpoint.
 
-    `sum_of_squares` is the weighted regression objective computed by
-    `SaturationPressureExperiment.calculate_sum_of_squares` using the request's
-    `measured` and `weights`. It is `0.0` when no weight was provided.
+    Carries the full data set that fluidmagic's
+    `SaturationPressureExperiment.print_results` dumps to the console when
+    running a `.magic` case with `print: true`:
+
+    - `eos_model_name`, `temperature`, `component_names` and `input_composition`
+      identify the fluid and conditions the experiment was run at.
+    - `saturation_pressure_calculated` holds the calculated saturation
+      pressure, the saturation / fluid type, and the incipient equilibrium
+      gas / oil compositions.
+    - `measured` echoes the request's measured saturation pressure (or
+      `null` when none was provided) so callers can render the calculated /
+      measured comparison exactly the way the terminal print does.
+    - `sum_of_squares` is the weighted regression objective computed by
+      `SaturationPressureExperiment.calculate_sum_of_squares` using the
+      request's `measured` and `weights`. It is `0.0` when no weight was
+      provided.
     """
 
-    saturation_pressure_calculated: SaturationPressureCalculated = Field(
-        ..., description="Saturation pressure result and equilibrium compositions."
+    eos_model_name: str = Field(..., description="Name of the EOS model used for the simulation.")
+    temperature: float = Field(
+        ..., description="Isothermal temperature in °C the saturation-pressure calculation was run at."
+    )
+    component_names: list[str] = Field(
+        ...,
+        description="EOS component names, in the same order as `input_composition` and the composition axes of `saturation_pressure_calculated`.",
+    )
+    input_composition: list[float] = Field(
+        ...,
+        description="Input molar composition (before normalisation), aligned with `component_names`.",
+    )
+    measured: PsatMeasuredModel = Field(
+        default_factory=PsatMeasuredModel,
+        description=(
+            "Measured saturation pressure echoed back for parity with the terminal `print_results` output. "
+            "Same shape as the request's `measured` object; returned as `null` when no measurement was provided."
+        ),
+    )
+    saturation_pressure_calculated: PsatCalculatedResponse = Field(
+        ..., description="Saturation pressure result and incipient equilibrium compositions."
     )
     sum_of_squares: float = Field(
         ...,
@@ -1086,11 +1586,80 @@ class ProcessSimulationRequestModel(BaseModel):
     )
 
 
-class ProcessSimulationResponseModel(BaseModel):
-    """Per-tank results from a surface-process simulation.
+class ProcessTotalsResponse(BaseModel):
+    """Aggregate process totals matching fluidmagic's console output.
 
-    Each list has one entry per tank in the request (in declaration order); the
-    composition lists have an inner list of length `component_count`.
+    Populated from the same values `Process.simulate_process(log_to_console=True)`
+    logs when a `.magic` case runs a `simulate: type: process` with
+    `print: true`. Compositions and phase-summary fields are `None`-filled
+    when the process definition does not include a collector tank of that
+    type (e.g. no NGL tank).
+
+    All compositions are per-component fractions in the EOS component order.
+    """
+
+    # Header block (`Total number of moles`, ..., `Gas mole fraction`, `Total gas-oil ratio`).
+    total_moles: float = Field(..., description="Sum of input moles across all components.")
+    total_oil_moles: float = Field(..., description="Total oil moles collected across all OIL_TANK collectors.")
+    total_gas_moles: float = Field(..., description="Total gas moles collected across all GAS_TANK collectors.")
+    total_ngl_moles: float = Field(..., description="Total NGL moles collected across all NGL_TANK collectors.")
+    gas_mole_fraction: float | None = Field(
+        None, description="`total_gas_moles / total_moles`; `null` when the input stream has zero moles."
+    )
+    total_gas_oil_ratio: float | None = Field(
+        None,
+        description=(
+            "`total_gas_volume / (total_oil_volume + total_ngl_volume)` in m³/m³; "
+            "`null` when the combined oil + NGL volume is zero."
+        ),
+    )
+
+    # Per-outlet aggregate volumes (m³). `null` when the process has no matching collector.
+    total_oil_volume: float | None = Field(None, description="Total oil volume in m³ across all OIL_TANK collectors.")
+    total_gas_volume: float | None = Field(None, description="Total gas volume in m³ across all GAS_TANK collectors.")
+    total_ngl_volume: float | None = Field(None, description="Total NGL volume in m³ across all NGL_TANK collectors.")
+
+    # Aggregate compositions at collector outlets (per component). The
+    # first matching collector tank is used as the aggregate composition
+    # (matches how fluidmagic prints the outlet compositions).
+    oil_composition: list[float | None] = Field(
+        ..., description="Aggregate oil composition at the first OIL_TANK outlet, per component."
+    )
+    gas_composition: list[float | None] = Field(
+        ..., description="Aggregate gas composition at the first GAS_TANK outlet, per component."
+    )
+    ngl_composition: list[float | None] = Field(
+        ..., description="Aggregate NGL composition at the first NGL_TANK outlet, per component."
+    )
+
+    # Per-phase summary matrix (Avg. MW, Density) mirroring the printed
+    # `TotalFluid / Gas / Oil / NGL` table.
+    average_molecular_weight_input: float = Field(
+        ..., description="Average molecular weight of the input molar stream (the `TotalFluid` column)."
+    )
+    average_molecular_weight_oil: float | None = Field(
+        None, description="Average molecular weight of the aggregate oil outlet."
+    )
+    average_molecular_weight_gas: float | None = Field(
+        None, description="Average molecular weight of the aggregate gas outlet."
+    )
+    average_molecular_weight_ngl: float | None = Field(
+        None, description="Average molecular weight of the aggregate NGL outlet."
+    )
+    oil_density: float | None = Field(None, description="Aggregate oil density in kg/m³.")
+    gas_density: float | None = Field(None, description="Aggregate gas density in kg/m³.")
+    ngl_density: float | None = Field(None, description="Aggregate NGL density in kg/m³.")
+
+
+class ProcessCalculatedResponse(BaseModel):
+    """Per-tank results from a surface-process simulation, plus aggregate totals.
+
+    Each per-tank list has one entry per tank in the request (in declaration
+    order); the composition lists have an inner list of length
+    `component_count`. `totals` carries the aggregate summary that
+    fluidmagic's `simulate_process(log_to_console=True)` prints to the
+    console — outlet compositions, average molecular weights and densities
+    for the Oil / Gas / NGL collectors.
     """
 
     tank_names: list[str] = Field(..., description="Names of the tanks (matches request order).")
@@ -1098,8 +1667,51 @@ class ProcessSimulationResponseModel(BaseModel):
     gas_volume: list[float] = Field(..., description="Gas volume per tank in m³.")
     oil_moles: list[float] = Field(..., description="Oil moles per tank.")
     gas_moles: list[float] = Field(..., description="Gas moles per tank.")
-    oil_compositions: list[list[float]] = Field(..., description="Oil composition per tank.")
-    gas_compositions: list[list[float]] = Field(..., description="Gas composition per tank.")
+    oil_compositions: list[list[float | None]] = Field(..., description="Oil composition per tank.")
+    gas_compositions: list[list[float | None]] = Field(..., description="Gas composition per tank.")
+    totals: ProcessTotalsResponse = Field(
+        ...,
+        description=(
+            "Aggregate totals for the whole process (moles, volumes, outlet compositions, "
+            "average molecular weights and densities per phase) matching what fluidmagic's "
+            "`Process.simulate_process(log_to_console=True)` prints to the console."
+        ),
+    )
+
+
+class ProcessSimulationResponseModel(BaseModel):
+    """Response wrapper for the surface-process simulation endpoint.
+
+    Carries the full data set that fluidmagic's `Process.simulate_process(
+    log_to_console=True)` writes to the console when running a `.magic` case
+    with `print: true`:
+
+    - `eos_model_name`, `process_name`, `component_names` and
+      `input_composition` identify the fluid and process the simulation was
+      run on.
+    - `process_calculated` holds the per-tank oil/gas volumes, moles and
+      compositions, plus a `totals` block with the aggregate summary
+      (outlet compositions, average molecular weights and densities per
+      phase) that mirrors the printed table.
+    """
+
+    eos_model_name: str = Field(..., description="Name of the EOS model used for the simulation.")
+    process_name: str = Field(..., description="Name of the surface-process definition used for the simulation.")
+    component_names: list[str] = Field(
+        ...,
+        description="EOS component names, in the same order as `input_composition` and the composition axes of `process_calculated`.",
+    )
+    input_composition: list[float] = Field(
+        ...,
+        description="Input molar stream in kg-moles per component, aligned with `component_names`.",
+    )
+    process_calculated: ProcessCalculatedResponse = Field(
+        ...,
+        description=(
+            "Per-tank oil/gas volumes, moles and compositions together with the aggregate "
+            "totals (outlet compositions, average molecular weights, densities per phase)."
+        ),
+    )
 
 
 class ProcessInlineRequestModel(BaseModel):
