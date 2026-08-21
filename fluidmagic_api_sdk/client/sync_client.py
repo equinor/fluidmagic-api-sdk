@@ -5,6 +5,7 @@ import httpx
 
 from ..resources.facility import Facility
 from ..resources.managers.conversions_manager import ConversionsManager
+from ..resources.managers.simulations_manager import SimulationsManager
 from .base_client import BaseClient
 
 
@@ -134,6 +135,10 @@ class Client(BaseClient):
     @cached_property
     def conversions(self) -> ConversionsManager:
         return ConversionsManager(self)
+
+    @cached_property
+    def simulations(self) -> SimulationsManager:
+        return SimulationsManager(self)
 
     # Public API methods
     def list_facilities(self) -> list[Facility]:

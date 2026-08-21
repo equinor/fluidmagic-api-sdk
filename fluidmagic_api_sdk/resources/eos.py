@@ -1,9 +1,8 @@
 from abc import ABC
 from typing import TYPE_CHECKING, Any
 
-from fluidmagic_api_sdk.models.data_models.calculated import FlashCalculated
 from fluidmagic_api_sdk.models.eos_models import EOSCreateModel, EOSModel, EOSOverviewModel
-from fluidmagic_api_sdk.models.simulate_models import FlashCalculationRequestModel
+from fluidmagic_api_sdk.models.simulate_models import FlashSimulationRequestModel, FlashSimulationResponseModel
 from fluidmagic_api_sdk.resources.base_resource import (
     BaseConfigResource,
     BaseConfigResourceAsync,
@@ -57,7 +56,7 @@ class BaseEOS(EOSModel, BaseConfigResource, ABC):
 
     @classmethod
     def _build_simulate_flash_request(
-        cls, facility_id: str, eos_id: str, input_data: FlashCalculationRequestModel
+        cls, facility_id: str, eos_id: str, input_data: FlashSimulationRequestModel
     ) -> dict[str, Any]:
         return {
             "method": "POST",
@@ -66,8 +65,8 @@ class BaseEOS(EOSModel, BaseConfigResource, ABC):
         }
 
     @classmethod
-    def _parse_flash_result(cls, payload: dict) -> FlashCalculated:
-        return FlashCalculated.model_validate(payload)
+    def _parse_flash_result(cls, payload: dict) -> FlashSimulationResponseModel:
+        return FlashSimulationResponseModel.model_validate(payload)
 
 
 class EOS(BaseEOS, BaseConfigResourceSync):
@@ -87,7 +86,7 @@ class EOS(BaseEOS, BaseConfigResourceSync):
 
     def simulate_flash(
         self, molar_composition: list[float], temperature_conditions: list[float], pressure_conditions: list[float]
-    ) -> FlashCalculated:
+    ) -> FlashSimulationResponseModel:
         """Simulate a flash calculation using this EOS model.
 
         Args:
@@ -96,10 +95,10 @@ class EOS(BaseEOS, BaseConfigResourceSync):
             pressure_conditions: Pressure conditions to simulate at.
 
         Returns:
-            dict: The result of the flash calculation.
+            FlashSimulationResponseModel: The result of the flash calculation.
         """
 
-        input_data = FlashCalculationRequestModel(
+        input_data = FlashSimulationRequestModel(
             molar_composition=molar_composition,
             temperatures=temperature_conditions,
             pressures=pressure_conditions,
@@ -126,10 +125,10 @@ class EOSAsync(BaseEOS, BaseConfigResourceAsync):
 
     async def simulate_flash(
         self, molar_composition: list[float], temperature_conditions: list[float], pressure_conditions: list[float]
-    ) -> FlashCalculated:
+    ) -> FlashSimulationResponseModel:
         """Simulate a flash calculation asynchronously using this EOS model."""
 
-        input_data = FlashCalculationRequestModel(
+        input_data = FlashSimulationRequestModel(
             molar_composition=molar_composition,
             temperatures=temperature_conditions,
             pressures=pressure_conditions,

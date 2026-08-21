@@ -6,6 +6,7 @@ import httpx
 from fluidmagic_api_sdk.resources.async_facility import AsyncFacility
 
 from ..resources.managers.conversions_manager import AsyncConversionsManager
+from ..resources.managers.simulations_manager import AsyncSimulationsManager
 from .base_client import BaseClient
 
 
@@ -135,6 +136,10 @@ class AsyncClient(BaseClient):
     @cached_property
     def conversions(self) -> AsyncConversionsManager:
         return AsyncConversionsManager(self)
+
+    @cached_property
+    def simulations(self) -> AsyncSimulationsManager:
+        return AsyncSimulationsManager(self)
 
     # Public API methods
     async def list_facilities(self) -> list[AsyncFacility]:
