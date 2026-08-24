@@ -5,13 +5,6 @@ DEV: https://api-fluidmagic-api-dev.radix.equinor.com/docs#/
 
 PROD: https://api-fluidmagic-api-prod.radix.equinor.com/docs#/
 
-## Installation
-
-Install the package using pip:
-
-```bash
-pip install fluidmagic-api-sdk
-```
 
 ## Quick Start
 
@@ -69,6 +62,8 @@ The `examples/` directory contains comprehensive examples demonstrating SDK func
 - **01_run_client_within_context_manager.py** - Basic client usage with credentials
 - **02_login_with_interactive_client.py** - Interactive login flow
 - **03_async_client.py** - Asynchronous client operations
-- **04_eos_interaction_and_flash_simulation.py** - EOS management and flash simulations
-- **05_run_moles_to_vol_conversion.py** - Moles to volume conversion workflow
-- **06_run_rate_to_moles_conversion.py** - Rate to moles conversion workflow
+- **04_run_conversions.py** - Inline conversion examples
+- **05_run_simulations.py** - Inline simulation examples
+- **06_run_eos_development_functions.py** - EOS development functions (e.g., create default EOS, tune EOS)
+
+Shared input payloads used by the examples are defined in `examples/data/`.

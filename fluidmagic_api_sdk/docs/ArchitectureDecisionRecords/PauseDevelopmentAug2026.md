@@ -32,7 +32,7 @@ The SDK could be reshaped into a different kind of integration layer (for exampl
 Strip the SDK down to request/response models and example scripts that demonstrate how to call the API directly, without maintaining a full SDK abstraction. Rejected for now because it still requires ongoing maintenance effort and a decision on packaging, and the same effect can be achieved by pointing users at the existing `examples/` directory.
 
 ### 4. Deprecate and archive publicly
-Publish a final release with a clear deprecation notice, mark the repository read-only, and remove the package from PyPI (or mark it as yanked/deprecated). Rejected at this time because we want to preserve the option to resume; a hard deprecation would signal a stronger commitment than "paused."
+Publish a final release with a clear deprecation notice, mark the repository read-only. Rejected at this time because we want to preserve the option to resume; a hard deprecation would signal a stronger commitment than "paused."
 
 ## Consequences
 
@@ -45,4 +45,3 @@ Publish a final release with a clear deprecation notice, mark the repository rea
 - The repository will not receive new features or routine maintenance while paused.
 - Existing users (if any) will need to call the API directly; there is no active migration support.
 - Open issues and pull requests will not be actively triaged during the pause.
-
