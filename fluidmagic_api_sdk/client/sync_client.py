@@ -5,6 +5,7 @@ import httpx
 
 from ..resources.facility import Facility
 from ..resources.managers.conversions_manager import ConversionsManager
+from ..resources.managers.eos_development_manager import EOSDevelopmentManager
 from ..resources.managers.simulations_manager import SimulationsManager
 from .base_client import BaseClient
 
@@ -139,6 +140,10 @@ class Client(BaseClient):
     @cached_property
     def simulations(self) -> SimulationsManager:
         return SimulationsManager(self)
+
+    @cached_property
+    def eos(self) -> EOSDevelopmentManager:
+        return EOSDevelopmentManager(self)
 
     # Public API methods
     def list_facilities(self) -> list[Facility]:

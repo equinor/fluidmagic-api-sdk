@@ -58,3 +58,19 @@ class MoleOrMass(NoCasingEnum):
 
     MOLE_TO_MASS = "mole_to_mass"
     MASS_TO_MOLE = "mass_to_mole"
+
+
+class LumpingOption(NoCasingEnum):
+    """Different options to create pseudo-fractions in characterization."""
+
+    EQUAL_MOLES = auto()
+    EQUAL_MASS = auto()
+    GAUSSIAN_QUADRATURE = auto()
+
+
+class CriticalVolumeOption(NoCasingEnum):
+    """Different options to calculate pseudo-fractions critical volumes."""
+
+    HALL_YARBOROUGH = auto()
+    RIAZI_DAUBERT = auto()
+    KATZ_FIROOZABADI = auto()
